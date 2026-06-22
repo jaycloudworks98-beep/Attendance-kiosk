@@ -212,6 +212,8 @@
   .cap-prog{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.88);
     color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center}
   .cdots{display:flex;gap:6px}.cd{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3)}.cd.on{background:var(--green)}
+  .cap-flip{position:absolute;top:10px;right:10px;background:rgba(15,23,42,.8);color:#fff;border:none;
+    padding:7px 13px;border-radius:18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;z-index:2}
 
   .btn{padding:13px 20px;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit;transition:.15s}
   .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-dark)}
@@ -592,28 +594,41 @@ function mtab(t,b){document.querySelectorAll('.mtab').forEach(function(x){x.clas
   if(t==='roster')renderRoster();}
 
 /* ENROLL */
+var capFacing='user';
 async function capStart(){
   var c=document.getElementById('cap');c.innerHTML='';
-  capVid=document.createElement('video');capVid.autoplay=true;capVid.muted=true;capVid.playsInline=true;c.appendChild(capVid);
+  capVid=document.createElement('video');capVid.autoplay=true;capVid.muted=true;capVid.playsInline=true;capVid.setAttribute('playsinline','');c.appendChild(capVid);
   var pr=document.createElement('div');pr.className='cap-prog';
   pr.innerHTML='<span>Captured</span><div class="cdots"><div class="cd" id="cd0"></div><div class="cd" id="cd1"></div><div class="cd" id="cd2"></div></div>';c.appendChild(pr);
-  try{capStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});capVid.srcObject=capStream;
-    document.getElementById('capBtn').disabled=false;}catch(e){c.innerHTML='<div class="cap-hint">Camera access denied</div>';}
+  var flip=document.createElement('button');flip.type='button';flip.className='cap-flip';flip.innerHTML='⟲ Flip';
+  flip.onclick=function(ev){ev.stopPropagation();capFacing=(capFacing==='user'?'environment':'user');capStart();};
+  c.appendChild(flip);
+  try{
+    capStop();
+    capStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:capFacing},width:{ideal:1280},height:{ideal:720}}});
+    capVid.srcObject=capStream;await capVid.play();
+    document.getElementById('capBtn').disabled=false;
+    toast(capFacing==='user'?'Front camera — point at your face':'Back camera on','ok');
+  }catch(e){
+    try{capStream=await navigator.mediaDevices.getUserMedia({video:true});capVid.srcObject=capStream;await capVid.play();document.getElementById('capBtn').disabled=false;}
+    catch(e2){c.innerHTML='<div class="cap-hint">Camera access denied — check browser permissions</div>';}
+  }
 }
 function capStop(){if(capStream){capStream.getTracks().forEach(function(t){t.stop();});capStream=null;}}
 async function capAngle(){
   if(!capVid||!capVid.videoWidth){toast('Start camera first','err');return;}
-  if(!ready){toast('Engine still loading…','err');return;}
+  if(!ready){toast('Engine still loading — wait a moment','err');return;}
   var cv=document.createElement('canvas');cv.width=capVid.videoWidth;cv.height=capVid.videoHeight;
   cv.getContext('2d').drawImage(capVid,0,0);
-  var det=await faceapi.detectSingleFace(cv).withFaceLandmarks().withFaceDescriptor();
-  if(!det){toast('No face detected — center & retry','err');return;}
+  toast('Scanning for face…','');
+  var det=await faceapi.detectSingleFace(cv,new faceapi.SsdMobilenetv1Options({minConfidence:0.3})).withFaceLandmarks().withFaceDescriptor();
+  if(!det){toast('No face found — point at your face, good light, fill the frame','err');return;}
   samples.push(Array.from(det.descriptor));
   if(samples.length===1)capPhoto=cropFace(cv,det.detection.box);
   var d=document.getElementById('cd'+(samples.length-1));if(d)d.classList.add('on');
   document.getElementById('capBtn').textContent='Capture ('+samples.length+'/3)';
   if(samples.length>=3){document.getElementById('capBtn').disabled=true;document.getElementById('enrollBtn').disabled=false;toast('All 3 angles captured','ok');}
-  else toast('Angle '+samples.length+' saved — turn slightly','ok');
+  else toast('Angle '+samples.length+' captured — turn head slightly','ok');
 }
 function cropFace(cv,box){var pad=box.width*.4,x=Math.max(0,box.x-pad),y=Math.max(0,box.y-pad),
   w=Math.min(cv.width-x,box.width+pad*2),h=Math.min(cv.height-y,box.height+pad*2);
