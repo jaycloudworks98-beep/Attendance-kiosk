@@ -162,7 +162,7 @@
   <div class="topbar">
     <div class="company">
       <div class="company-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
-      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v3</div></div>
+      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v4</div></div>
     </div>
     <div class="topbar-clock"><div class="tb-time" id="clock">00:00</div><div class="tb-date" id="date">—</div></div>
   </div>
@@ -223,7 +223,7 @@
 <script type="module">
 import Human from "https://cdn.jsdelivr.net/npm/@vladmandic/human/dist/human.esm.js";
 
-var SCAN_MS=500, COOLDOWN=8000, HOLD=3400, MATCH_MIN=0.55, CLOSE_WINDOW_MIN=60;
+var SCAN_MS=400, COOLDOWN=8000, HOLD=3400, MATCH_MIN=0.62, MATCH_MARGIN=0.06, CONFIRM_FRAMES=2, CLOSE_WINDOW_MIN=60;
 var audioCtx=null, paused=false, pendingOut=null;
 function getAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}catch(e){return null;}}
 var DEFAULT_PIN='1234';
@@ -258,13 +258,20 @@ window.addEventListener('focus',function(){if(!document.hidden)resumeKiosk();});
 /* ===== Face matching via Human embeddings (1024-dim descriptors) ===== */
 /* Each enrolled person stores s.sigs = array of embedding vectors (one per angle). */
 function bestMatch(embedding){
-  var best=null,bestSim=0;
+  // best similarity PER PERSON, then pick top two distinct people
+  var perPerson=[];
   for(var i=0;i<staff.length;i++){var s=staff[i];if(!s.sigs||!s.sigs.length)continue;
+    var top=0;
     for(var j=0;j<s.sigs.length;j++){
       var sim;try{sim=human.match.similarity(embedding,s.sigs[j]);}catch(e){sim=0;}
-      if(sim>bestSim){bestSim=sim;best=s;}
-    }}
-  return {person:best,sim:bestSim};
+      if(sim>top)top=sim;
+    }
+    perPerson.push({person:s,sim:top});
+  }
+  perPerson.sort(function(a,b){return b.sim-a.sim;});
+  var first=perPerson[0]||{person:null,sim:0};
+  var second=perPerson[1]||{person:null,sim:0};
+  return {person:first.person,sim:first.sim,runnerSim:second.sim};
 }
 
 function setSync(online){var b=document.getElementById('syncBadge'),t=document.getElementById('syncTxt');if(!b)return;b.className='sync'+(online?' online':'');t.textContent=online?'Cloud synced':'Offline';}
@@ -341,7 +348,7 @@ async function startCamera(){
   }catch(e){document.getElementById('loadState').classList.add('hidden');showState('permState');}
 }
 function scan(){if(timer)clearInterval(timer);timer=setInterval(loop,SCAN_MS);}
-var scanning=false;
+var scanning=false, confirmId=null, confirmCount=0;
 async function loop(){
   if(paused||!ready||busy||scanning)return;var v=document.getElementById('video');if(!v.videoWidth)return;
   var enrolled=staff.filter(function(s){return s.sigs&&s.sigs.length;});if(!enrolled.length)return;
@@ -350,12 +357,24 @@ async function loop(){
   scanning=false;
   if(paused||busy)return;
   var zone=document.getElementById('scanZone');
-  if(!res||!res.face||!res.face.length){zone.className='scan-zone';setPrompt('Look at the camera','Your attendance is marked automatically');return;}
+  if(!res||!res.face||!res.face.length){zone.className='scan-zone';confirmId=null;confirmCount=0;setPrompt('Look at the camera','Your attendance is marked automatically');return;}
+  // reject if more than one face in frame (avoids wrong person)
+  if(res.face.length>1){zone.className='scan-zone detecting';confirmId=null;confirmCount=0;setPrompt('One person at a time','Please step in one by one');return;}
   var face=res.face[0];
   if(!face.embedding||!face.embedding.length){zone.className='scan-zone detecting';setPrompt('Hold still…','Reading your face');return;}
+  // require a reasonably front-facing, confident detection
+  if(face.score!==undefined && face.score<0.6){zone.className='scan-zone detecting';setPrompt('Look at the camera','Face the screen directly');return;}
   zone.className='scan-zone detecting';
   var m=bestMatch(face.embedding);
-  if(!m.person||m.sim<MATCH_MIN){zone.className='scan-zone fail';setPrompt('Face not recognized','Please try again or see admin');return;}
+  // 1) absolute threshold  2) clear margin over the runner-up (no confusion)
+  if(!m.person||m.sim<MATCH_MIN||(m.sim-m.runnerSim)<MATCH_MARGIN){
+    confirmId=null;confirmCount=0;
+    zone.className='scan-zone fail';setPrompt('Face not recognized','Please try again or see admin');return;
+  }
+  // 3) multi-frame confirmation: same person must win CONFIRM_FRAMES times in a row
+  if(confirmId===m.person.id){confirmCount++;}else{confirmId=m.person.id;confirmCount=1;}
+  if(confirmCount<CONFIRM_FRAMES){setPrompt('Verifying…','Hold still for a moment');return;}
+  confirmId=null;confirmCount=0;
   var now=Date.now();if(lastSeen[m.person.id]&&now-lastSeen[m.person.id]<COOLDOWN)return;
   lastSeen[m.person.id]=now;mark(m.person);
 }
@@ -482,8 +501,21 @@ window.capAngle=async function(){
   if(!ready){toast('Engine still loading — wait a moment','err');return;}
   var btn=document.getElementById('capBtn');btn.disabled=true;var prevTxt=btn.textContent;btn.textContent='Reading…';
   var res;try{res=await human.detect(capVid);}catch(e){btn.disabled=false;btn.textContent=prevTxt;toast('Detection error — retry','err');return;}
-  if(!res||!res.face||!res.face.length||!res.face[0].embedding||!res.face[0].embedding.length){btn.disabled=false;btn.textContent=prevTxt;toast('No clear face — wait for green "Face detected" badge','err');return;}
-  samples.push(res.face[0].embedding.slice());
+  if(!res||!res.face||!res.face.length){btn.disabled=false;btn.textContent=prevTxt;toast('No face — center your face in the frame','err');return;}
+  if(res.face.length>1){btn.disabled=false;btn.textContent=prevTxt;toast('Multiple faces — only the person being enrolled should be visible','err');return;}
+  var face=res.face[0];
+  if(!face.embedding||!face.embedding.length){btn.disabled=false;btn.textContent=prevTxt;toast('No clear face — wait for the green "Face detected" badge','err');return;}
+  if(face.score!==undefined&&face.score<0.6){btn.disabled=false;btn.textContent=prevTxt;toast('Face not clear — face the camera in good light','err');return;}
+  var emb=face.embedding.slice();
+  // guard: this capture must not strongly match a DIFFERENT already-enrolled person
+  var conflict=null,conflictSim=0;
+  for(var i=0;i<staff.length;i++){var s=staff[i];if(!s.sigs||!s.sigs.length)continue;
+    for(var j=0;j<s.sigs.length;j++){var sm;try{sm=human.match.similarity(emb,s.sigs[j]);}catch(e){sm=0;}if(sm>conflictSim){conflictSim=sm;conflict=s;}}}
+  if(conflict&&conflictSim>=0.7){btn.disabled=false;btn.textContent=prevTxt;toast('This face already matches "'+conflict.name+'". Cannot enroll the same person twice.','err');return;}
+  // guard: all captured angles of THIS person should be the same face
+  if(samples.length){var selfMin=1;for(var k=0;k<samples.length;k++){var ss;try{ss=human.match.similarity(emb,samples[k]);}catch(e){ss=0;}if(ss<selfMin)selfMin=ss;}
+    if(selfMin<0.5){btn.disabled=false;btn.textContent=prevTxt;toast('This looks like a different person than the previous angle — retry','err');return;}}
+  samples.push(emb);
   if(samples.length===1)capPhoto=snapPhoto();
   var d=document.getElementById('cd'+(samples.length-1));if(d)d.classList.add('on');
   btn.textContent='Capture ('+samples.length+'/3)';btn.disabled=false;
