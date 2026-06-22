@@ -51,6 +51,29 @@
   .res-time-big{font-size:38px;font-weight:900;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;line-height:.95}
   .res-time-label{font-size:12px;color:var(--slate);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-top:6px}
   .res-hours{font-size:13px;color:var(--slate);font-weight:600;margin-top:8px}
+
+  /* FULL-SCREEN FLASH (check-in green / checkout-confirm red) */
+  .flash{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .25s ease;padding:30px}
+  .flash.show{opacity:1;visibility:visible}
+  .flash.green{background:linear-gradient(160deg,#10b981,#059669)}
+  .flash.red{background:linear-gradient(160deg,#ef4444,#dc2626)}
+  .flash.blue{background:linear-gradient(160deg,#3b82f6,#2563eb)}
+  .flash-inner{text-align:center;color:#fff;max-width:560px;width:100%;transform:scale(.9);transition:transform .3s cubic-bezier(.34,1.4,.5,1)}
+  .flash.show .flash-inner{transform:scale(1)}
+  .flash-photo{width:120px;height:120px;border-radius:30px;margin:0 auto 22px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800;background:rgba(255,255,255,.2);border:4px solid rgba(255,255,255,.5);color:#fff}
+  .flash-photo img{width:100%;height:100%;object-fit:cover}
+  .flash-icon{width:72px;height:72px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center}
+  .flash-icon svg{width:72px;height:72px;color:#fff;stroke-width:2.5}
+  .flash-title{font-size:22px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.92}
+  .flash-name{font-size:46px;font-weight:900;letter-spacing:-1px;line-height:1.05;margin-top:6px}
+  .flash-time{font-size:64px;font-weight:900;letter-spacing:-2px;font-variant-numeric:tabular-nums;margin-top:14px;line-height:1}
+  .flash-note{font-size:17px;font-weight:600;opacity:.9;margin-top:14px;line-height:1.4}
+  .flash-actions{display:flex;gap:14px;justify-content:center;margin-top:30px}
+  .flash-btn{padding:18px 34px;border:none;border-radius:16px;font-size:19px;font-weight:800;font-family:inherit;cursor:pointer;min-width:150px}
+  .flash-btn.confirm{background:#fff;color:#dc2626}
+  .flash-btn.cancel{background:rgba(255,255,255,.22);color:#fff;border:2px solid rgba(255,255,255,.5)}
+  .flash-btn:active{transform:scale(.96)}
+  .flash-count{position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:15px;font-weight:600;color:rgba(255,255,255,.8)}
   .bottombar{position:absolute;bottom:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:center;gap:40px;padding:24px;background:linear-gradient(to top,rgba(11,17,32,.55),transparent);}
   .bcount{text-align:center}
   .bcount-num{font-size:30px;font-weight:900;letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums}
@@ -150,6 +173,17 @@
     <div class="res-body"><div class="res-greet" id="resGreet">Welcome</div><div class="res-name" id="resName">—</div><div class="res-status in" id="resStatus">Checked in</div></div>
     <div class="res-time"><div class="res-time-big" id="resTime">—</div><div class="res-time-label" id="resTimeLabel">Check-in</div><div class="res-hours" id="resHours"></div></div>
   </div>
+  <div class="flash" id="flash">
+    <div class="flash-inner">
+      <div class="flash-photo" id="flashPhoto">—</div>
+      <div class="flash-icon" id="flashIcon"></div>
+      <div class="flash-title" id="flashTitle">—</div>
+      <div class="flash-name" id="flashName">—</div>
+      <div class="flash-time" id="flashTime">—</div>
+      <div class="flash-note" id="flashNote"></div>
+      <div class="flash-actions" id="flashActions"></div>
+    </div>
+  </div>
   <div class="bottombar">
     <div class="bcount"><div class="bcount-num green" id="cIn">0</div><div class="bcount-label">Checked in today</div></div>
     <div class="bcount-div"></div>
@@ -189,7 +223,9 @@
 <script type="module">
 import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 
-var SCAN_MS=600, COOLDOWN=8000, HOLD=3400, MATCH_DIST=0.16;
+var SCAN_MS=600, COOLDOWN=8000, HOLD=3400, MATCH_DIST=0.16, CLOSE_WINDOW_MIN=60;
+var audioCtx=null, paused=false, pendingOut=null;
+function getAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}catch(e){return null;}}
 var DEFAULT_PIN='1234';
 
 /* ===== CLOUD CONFIG (hardcoded — shared across all devices) ===== */
@@ -210,6 +246,14 @@ function tick(){var n=new Date();
   document.getElementById('clock').textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
   document.getElementById('date').textContent=n.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});}
 setInterval(tick,1000);tick();
+
+/* ===== STOP SCAN + AUDIO WHEN TAB HIDDEN OR CLOSED (fixes phantom beeping) ===== */
+function pauseKiosk(){paused=true;if(timer){clearInterval(timer);timer=null;}try{if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}catch(e){}}
+function resumeKiosk(){paused=false;if(ready&&!timer)scan();try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();}catch(e){}}
+document.addEventListener('visibilitychange',function(){if(document.hidden)pauseKiosk();else resumeKiosk();});
+window.addEventListener('pagehide',function(){pauseKiosk();try{if(audioCtx){audioCtx.close();audioCtx=null;}}catch(e){}});
+window.addEventListener('blur',function(){try{if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}catch(e){}});
+window.addEventListener('focus',function(){if(!document.hidden)resumeKiosk();});
 
 /* signature from landmarks: normalized by inter-eye distance + rotation aligned */
 var SIG_IDX=[33,263,1,152,10,61,291,199,0,13,14,17,168,6,197,195,5,4,70,105,107,336,334,300,46,53,52,65,55,285,295,282,283,276,78,308,82,312,87,317,88,318,95,324,178,402,234,454,127,356,162,389,93,323,132,361];
@@ -246,7 +290,7 @@ async function loadCloud(){
   if(!supa||!companyId)return;
   try{
     var r=await supa.from('employees').select('*').eq('company_id',companyId);
-    if(r.data){staff=r.data.map(function(e){return{id:e.id,name:e.name,empId:e.emp_id,role:e.role,shift:e.shift,sigs:e.sigs,photo:e.photo,color:e.color||COLORS[0]};});}
+    if(r.data){staff=r.data.map(function(e){return{id:e.id,name:e.name,empId:e.emp_id,role:e.role,shift:e.shift,shiftEnd:e.shift_end||'18:00',sigs:e.sigs,photo:e.photo,color:e.color||COLORS[0]};});}
     var a=await supa.from('attendance').select('*').eq('company_id',companyId).eq('date',dayKey);
     if(a.data){log=a.data.map(function(x){var emp=staff.find(function(s){return s.id===x.emp_id;});return{empId:x.emp_id,name:emp?emp.name:'',role:emp?emp.role:'',photo:emp?emp.photo:null,color:emp?emp.color:COLORS[0],inTime:x.in_time,inTs:Date.now(),outTime:x.out_time,hours:x.hours,late:x.late};});}
     if(staff.filter(function(s){return s.sigs;}).length){hideStates();}
@@ -280,7 +324,7 @@ async function startCamera(){
 }
 function scan(){if(timer)clearInterval(timer);timer=setInterval(loop,SCAN_MS);}
 function loop(){
-  if(!ready||busy)return;var v=document.getElementById('video');if(!v.videoWidth)return;
+  if(paused||!ready||busy)return;var v=document.getElementById('video');if(!v.videoWidth)return;
   var enrolled=staff.filter(function(s){return s.sigs&&s.sigs.length;});if(!enrolled.length)return;
   var res;try{res=landmarker.detectForVideo(v,performance.now());}catch(e){return;}
   var zone=document.getElementById('scanZone');
@@ -293,30 +337,85 @@ function loop(){
 }
 function setPrompt(t,s){document.getElementById('promptText').textContent=t;document.getElementById('promptSub').textContent=s;}
 
+function minutesNow(now){return now.getHours()*60+now.getMinutes();}
 function mark(p){
   busy=true;document.getElementById('scanZone').className='scan-zone success';
   var now=new Date();var time=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
-  var rec=log.find(function(l){return l.empId===p.id;}),mode,late=false;
-  if(!rec){mode='in';if(p.shift){var pp=p.shift.split(':');var la=(+pp[0])*60+(+pp[1])+(cfg.late||15);if(now.getHours()*60+now.getMinutes()>la)late=true;}
-    rec={empId:p.id,name:p.name,role:p.role,photo:p.photo,color:p.color,inTime:time,inTs:now.getTime(),late:late,outTime:null};log.push(rec);}
-  else if(!rec.outTime){mode='out';rec.outTime=time;rec.outTs=now.getTime();rec.hours=((rec.outTs-rec.inTs)/3600000).toFixed(1);late=rec.late;}
-  else{mode='done';}
-  saveLog();if(supa)pushCloud(rec,mode);showResult(p,mode,time,late,rec);beep(mode);refresh();
+  var rec=log.find(function(l){return l.empId===p.id;});
+
+  // CASE 1: not checked in yet -> instant GREEN check-in
+  if(!rec){
+    var late=false;if(p.shift){var pp=p.shift.split(':');var la=(+pp[0])*60+(+pp[1])+(cfg.late||15);if(minutesNow(now)>la)late=true;}
+    rec={empId:p.id,name:p.name,role:p.role,photo:p.photo,color:p.color,inTime:time,inTs:now.getTime(),late:late,outTime:null};log.push(rec);
+    saveLog();if(supa)pushCloud(rec,'in');beep('in');refresh();
+    showFlash('green',p,'Checked In',time,late?'Marked late':'Have a productive day','',null);
+    return;
+  }
+  // CASE 3: already checked out -> info
+  if(rec.outTime){
+    beep('done');
+    showFlash('blue',p,'Already Done',rec.outTime,'You already checked out today','',null);
+    return;
+  }
+  // CASE 2: checked in, not out yet -> decide confirm vs auto
+  var withinClosing=false;
+  if(p.shiftEnd){var ep=p.shiftEnd.split(':');var endMin=(+ep[0])*60+(+ep[1]);if(minutesNow(now)>=endMin-CLOSE_WINDOW_MIN)withinClosing=true;}
+  if(withinClosing){
+    // auto checkout, no confirm
+    doCheckout(p,rec,now,time,true);
+  }else{
+    // ask RED confirm
+    beep('confirm');
+    pendingOut={p:p,rec:rec};
+    showFlash('red',p,'Checking OUT?',time,'You are checking <b>OUT</b>, not in.<br>Confirm to end your day.','',[
+      {label:'Confirm Out',cls:'confirm',fn:'confirmOut'},
+      {label:'Cancel',cls:'cancel',fn:'cancelOut'}
+    ]);
+  }
 }
-function showResult(p,mode,time,late,rec){
-  var el=document.getElementById('result');var ini=p.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-  var ph=document.getElementById('resPhoto');if(p.photo){ph.innerHTML='<img src="'+p.photo+'">';}else{ph.textContent=ini;ph.style.color=p.color;ph.style.background=p.color+'18';}
-  document.getElementById('resName').textContent=p.name;
-  var greet=document.getElementById('resGreet'),st=document.getElementById('resStatus'),tl=document.getElementById('resTimeLabel'),hrs=document.getElementById('resHours');
-  document.getElementById('resTime').textContent=time.replace(/\s?[AP]M/i,'');hrs.textContent='';el.className='result show '+mode;
-  if(mode==='in'){greet.textContent='Welcome';st.className='res-status '+(late?'late':'in');st.textContent=late?'⏰ Checked in · Late':'✓ Checked in';tl.textContent='Check-in';setPrompt('Welcome, '+p.name.split(' ')[0]+'!','Have a great day');}
-  else if(mode==='out'){greet.textContent='Goodbye';st.className='res-status out';st.textContent='✓ Checked out';tl.textContent='Check-out';if(rec.hours)hrs.textContent=rec.hours+' hrs worked today';setPrompt('Goodbye, '+p.name.split(' ')[0]+'!','See you tomorrow');}
-  else{greet.textContent='Already done';st.className='res-status done';st.textContent='Attendance complete';tl.textContent='Done';hrs.textContent='Checked out at '+rec.outTime;setPrompt('All done for today','Attendance already complete');}
-  setTimeout(function(){el.className='result';busy=false;document.getElementById('scanZone').className='scan-zone';setPrompt('Look at the camera','Your attendance is marked automatically');},HOLD);
+function doCheckout(p,rec,now,time,early){
+  rec.outTime=time;rec.outTs=now.getTime();rec.hours=((rec.outTs-rec.inTs)/3600000).toFixed(1);
+  saveLog();if(supa)pushCloud(rec,'out');beep('out');refresh();
+  var note='';if(rec.hours)note=rec.hours+' hrs worked today';
+  if(early)note='Leaving early · '+(rec.hours||'')+' hrs today';
+  showFlash('blue',p,'Checked Out',time,note,'',null);
 }
-function beep(mode){try{var c=new(window.AudioContext||window.webkitAudioContext)();var seq=mode==='in'?[{f:660,t:0},{f:990,t:.12}]:mode==='out'?[{f:880,t:0},{f:587,t:.12}]:[{f:440,t:0}];
-  seq.forEach(function(n){var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=n.f;var s=c.currentTime+n.t;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.5,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.3);o.start(s);o.stop(s+.32);});
-  setTimeout(function(){try{c.close();}catch(e){}},800);}catch(e){}}
+window.confirmOut=function(){
+  if(!pendingOut)return;var po=pendingOut;pendingOut=null;
+  doCheckout(po.p,po.rec,new Date(),new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}),false);
+};
+window.cancelOut=function(){pendingOut=null;hideFlash();};
+
+function showFlash(color,p,title,time,note,extra,actions){
+  var f=document.getElementById('flash');
+  var ph=document.getElementById('flashPhoto');var ini=p.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  if(p.photo)ph.innerHTML='<img src="'+p.photo+'">';else{ph.innerHTML='';ph.textContent=ini;}
+  // icon
+  var icons={green:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    blue:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    red:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'};
+  document.getElementById('flashIcon').innerHTML=actions?icons.red:icons[color];
+  document.getElementById('flashTitle').textContent=title;
+  document.getElementById('flashName').textContent=p.name;
+  document.getElementById('flashTime').textContent=time.replace(/\s?[AP]M/i,'');
+  document.getElementById('flashNote').innerHTML=note||'';
+  var act=document.getElementById('flashActions');
+  if(actions){act.innerHTML=actions.map(function(a){return '<button class="flash-btn '+a.cls+'" onclick="'+a.fn+'()">'+a.label+'</button>';}).join('');}
+  else act.innerHTML='';
+  f.className='flash show '+color;
+  // auto-dismiss only when NOT a confirm prompt
+  if(!actions){clearTimeout(f._t);f._t=setTimeout(hideFlash,HOLD);}
+}
+function hideFlash(){
+  var f=document.getElementById('flash');f.className='flash';
+  busy=false;pendingOut=null;
+  document.getElementById('scanZone').className='scan-zone';
+  setPrompt('Look at the camera','Your attendance is marked automatically');
+}
+function beep(mode){var c=getAudio();if(!c)return;try{
+  var seq=mode==='in'?[{f:660,t:0},{f:990,t:.12}]:mode==='out'?[{f:880,t:0},{f:587,t:.12}]:mode==='confirm'?[{f:520,t:0}]:[{f:440,t:0}];
+  seq.forEach(function(n){var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=n.f;var s=c.currentTime+n.t;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.45,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.28);o.start(s);o.stop(s+.3);});
+}catch(e){}}
 function refresh(){document.getElementById('cIn').textContent=log.length;document.getElementById('cOut').textContent=log.filter(function(l){return l.outTime;}).length;if(cfg.company)document.getElementById('coName').textContent=cfg.company;}
 
 var pinBuf='';
