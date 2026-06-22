@@ -231,7 +231,7 @@ var DEFAULT_PIN='1234';
 /* ===== CLOUD CONFIG (hardcoded — shared across all devices) ===== */
 var SUPA_URL='https://ptwcqpoijortkvnfkavl.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0d2NxcG9pam9ydGt2bmZrYXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMDY2NjIsImV4cCI6MjA5NzY4MjY2Mn0.O4ifEiqqclNI1pPnhsXXFVoFxEZYA-qRPk4e_DIfqOk';
-var COMPANY_SLUG='vkfurnishing';
+var COMPANY_SLUG=(new URLSearchParams(location.search).get('company')||'vkfurnishing').toLowerCase().replace(/[^a-z0-9-]/g,'');
 
 var cfg=JSON.parse(localStorage.getItem('k_cfg')||'{}');
 var staff=[];
@@ -273,12 +273,12 @@ async function initSupa(){
   if(!window.supabase){setSync(false);return;}
   try{
     supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
-    // find or create this company
     var found=await supa.from('companies').select('*').eq('slug',COMPANY_SLUG).maybeSingle();
-    if(found.data){companyId=found.data.id;cfg.company=found.data.name;}
+    if(found.data){companyId=found.data.id;cfg.company=found.data.name;if(found.data.late_after)cfg.late=found.data.late_after;}
     else{
-      var ins=await supa.from('companies').insert({name:'VK Furnishing',slug:COMPANY_SLUG}).select().single();
-      if(ins.data){companyId=ins.data.id;cfg.company='VK Furnishing';}
+      // legacy default only — real companies are created via the TeamTrack signup page
+      if(COMPANY_SLUG==='vkfurnishing'){var ins=await supa.from('companies').insert({name:'VK Furnishing',slug:COMPANY_SLUG}).select().single();if(ins.data){companyId=ins.data.id;cfg.company='VK Furnishing';}}
+      else{setSync(false);setLoad('Company not found','This kiosk link is invalid. Please use the link from your TeamTrack signup.');showState('loadState');document.getElementById('loadState').classList.remove('hidden');return;}
     }
     setSync(true);
     await loadCloud();
