@@ -57,9 +57,12 @@
   .bcount-num.green{color:var(--green)}.bcount-num.blue{color:#60a5fa}
   .bcount-label{font-size:12px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:6px}
   .bcount-div{width:1px;height:38px;background:rgba(255,255,255,.15)}
-  .gear{position:absolute;bottom:20px;right:22px;z-index:9;width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.4);transition:.2s;}
-  .gear:hover{background:rgba(255,255,255,.16);color:rgba(255,255,255,.8)}
+  .gear{position:absolute;bottom:20px;right:22px;z-index:9;display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);cursor:pointer;color:rgba(255,255,255,.92);transition:.2s;font-weight:700;font-size:14px;font-family:inherit;}
+  .gear:hover{background:rgba(255,255,255,.24)}
   .gear svg{width:18px;height:18px}
+  .sync{position:absolute;bottom:24px;left:22px;z-index:9;display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:11px;background:rgba(255,255,255,.08);font-size:12px;font-weight:600;color:rgba(255,255,255,.6)}
+  .sync .sd{width:8px;height:8px;border-radius:50%;background:var(--amber)}
+  .sync.online .sd{background:var(--green)}.sync.online{color:rgba(255,255,255,.85)}
   .state{position:absolute;inset:0;z-index:20;background:#0b1120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:30px}
   .state.hidden{display:none}
   .ring{width:54px;height:54px;border:4px solid rgba(255,255,255,.12);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
@@ -152,7 +155,8 @@
     <div class="bcount-div"></div>
     <div class="bcount"><div class="bcount-num blue" id="cOut">0</div><div class="bcount-label">Checked out</div></div>
   </div>
-  <div class="gear" onclick="askPin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></div>
+  <div class="sync" id="syncBadge"><span class="sd"></span><span id="syncTxt">Local</span></div>
+  <div class="gear" onclick="askPin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span>Admin</span></div>
 </div>
 <div class="state" id="loadState"><div class="ring"></div><div class="state-title" id="loadTitle">Starting…</div><div class="state-sub" id="loadSub">Loading recognition engine</div></div>
 <div class="state hidden" id="permState"><svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><div class="state-title">Camera access needed</div><div class="state-sub">This kiosk needs the camera to mark attendance. Tap below and allow access.</div><button class="state-btn" onclick="startCamera()">Enable Camera</button></div>
@@ -187,10 +191,17 @@ import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@m
 
 var SCAN_MS=600, COOLDOWN=8000, HOLD=3400, MATCH_DIST=0.16;
 var DEFAULT_PIN='1234';
+
+/* ===== CLOUD CONFIG (hardcoded — shared across all devices) ===== */
+var SUPA_URL='https://ptwcqpoijortkvnfkavl.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0d2NxcG9pam9ydGt2bmZrYXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMDY2NjIsImV4cCI6MjA5NzY4MjY2Mn0.O4ifEiqqclNI1pPnhsXXFVoFxEZYA-qRPk4e_DIfqOk';
+var COMPANY_SLUG='vkfurnishing';
+
 var cfg=JSON.parse(localStorage.getItem('k_cfg')||'{}');
-var staff=JSON.parse(localStorage.getItem('k_staff')||'[]');
+var staff=[];
 var dayKey=new Date().toISOString().slice(0,10);
-var log=JSON.parse(localStorage.getItem('k_log_'+dayKey)||'[]');
+var log=[];
+var companyId=null;
 var landmarker=null, ready=false, timer=null, lastSeen={}, busy=false, supa=null;
 var COLORS=['#2563eb','#10b981','#f59e0b','#7c3aed','#db2777','#0891b2','#ea580c','#4f46e5'];
 var capStream=null,capVid=null,samples=[],capPhoto=null,capFacing='user',capLiveTimer=null;
@@ -212,8 +223,35 @@ function landmarksToSignature(lm){
 function sigDistance(a,b){if(!a||!b||a.length!==b.length)return 999;var s=0;for(var i=0;i<a.length;i++){var d=a[i]-b[i];s+=d*d;}return Math.sqrt(s/a.length);}
 function bestMatch(sig){var best=null,bestD=999;for(var i=0;i<staff.length;i++){var s=staff[i];if(!s.sigs)continue;for(var j=0;j<s.sigs.length;j++){var d=sigDistance(sig,s.sigs[j]);if(d<bestD){bestD=d;best=s;}}}return{person:best,dist:bestD};}
 
-function initSupa(){if(cfg.url&&cfg.key&&window.supabase){try{supa=window.supabase.createClient(cfg.url,cfg.key);loadCloud();}catch(e){}}}
-async function loadCloud(){if(!supa)return;try{var r=await supa.from('employees').select('*');if(r.data&&r.data.length){staff=r.data.map(function(e){return{id:e.id,name:e.name,empId:e.emp_id,role:e.role,shift:e.shift,sigs:e.sigs,photo:e.photo,color:e.color||COLORS[0]};});saveStaff();refresh();}}catch(e){}}
+function setSync(online){var b=document.getElementById('syncBadge'),t=document.getElementById('syncTxt');if(!b)return;b.className='sync'+(online?' online':'');t.textContent=online?'Cloud synced':'Offline';}
+
+async function initSupa(){
+  if(!window.supabase){setSync(false);return;}
+  try{
+    supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+    // find or create this company
+    var found=await supa.from('companies').select('*').eq('slug',COMPANY_SLUG).maybeSingle();
+    if(found.data){companyId=found.data.id;cfg.company=found.data.name;}
+    else{
+      var ins=await supa.from('companies').insert({name:'VK Furnishing',slug:COMPANY_SLUG}).select().single();
+      if(ins.data){companyId=ins.data.id;cfg.company='VK Furnishing';}
+    }
+    setSync(true);
+    await loadCloud();
+    refresh();
+  }catch(e){setSync(false);}
+}
+
+async function loadCloud(){
+  if(!supa||!companyId)return;
+  try{
+    var r=await supa.from('employees').select('*').eq('company_id',companyId);
+    if(r.data){staff=r.data.map(function(e){return{id:e.id,name:e.name,empId:e.emp_id,role:e.role,shift:e.shift,sigs:e.sigs,photo:e.photo,color:e.color||COLORS[0]};});}
+    var a=await supa.from('attendance').select('*').eq('company_id',companyId).eq('date',dayKey);
+    if(a.data){log=a.data.map(function(x){var emp=staff.find(function(s){return s.id===x.emp_id;});return{empId:x.emp_id,name:emp?emp.name:'',role:emp?emp.role:'',photo:emp?emp.photo:null,color:emp?emp.color:COLORS[0],inTime:x.in_time,inTs:Date.now(),outTime:x.out_time,hours:x.hours,late:x.late};});}
+    if(staff.filter(function(s){return s.sigs;}).length){hideStates();}
+  }catch(e){}
+}
 
 async function loadEngine(){
   setLoad('Loading recognition engine…','Google MediaPipe — mobile optimized');
@@ -277,7 +315,8 @@ function showResult(p,mode,time,late,rec){
   setTimeout(function(){el.className='result';busy=false;document.getElementById('scanZone').className='scan-zone';setPrompt('Look at the camera','Your attendance is marked automatically');},HOLD);
 }
 function beep(mode){try{var c=new(window.AudioContext||window.webkitAudioContext)();var seq=mode==='in'?[{f:660,t:0},{f:990,t:.12}]:mode==='out'?[{f:880,t:0},{f:587,t:.12}]:[{f:440,t:0}];
-  seq.forEach(function(n){var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=n.f;var s=c.currentTime+n.t;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.5,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.3);o.start(s);o.stop(s+.32);});}catch(e){}}
+  seq.forEach(function(n){var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=n.f;var s=c.currentTime+n.t;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.5,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.3);o.start(s);o.stop(s+.32);});
+  setTimeout(function(){try{c.close();}catch(e){}},800);}catch(e){}}
 function refresh(){document.getElementById('cIn').textContent=log.length;document.getElementById('cOut').textContent=log.filter(function(l){return l.outTime;}).length;if(cfg.company)document.getElementById('coName').textContent=cfg.company;}
 
 var pinBuf='';
@@ -330,8 +369,9 @@ function snapPhoto(){var cv=document.createElement('canvas');cv.width=160;cv.hei
 window.enroll=async function(){
   var name=document.getElementById('eName').value.trim();if(!name){toast('Enter name','err');return;}
   if(samples.length<3){toast('Capture all 3 angles','err');return;}
+  if(!supa||!companyId){toast('Not connected to cloud — cannot enroll. Check internet & reload.','err');return;}
   var p={id:'emp_'+Date.now(),name:name,empId:document.getElementById('eId').value.trim(),role:document.getElementById('eRole').value.trim()||'Staff',shift:document.getElementById('eShift').value||'09:00',sigs:samples.slice(),photo:capPhoto,color:COLORS[staff.length%COLORS.length]};
-  staff.push(p);saveStaff();if(supa)await pushEmp(p);samples=[];capPhoto=null;
+  await pushEmp(p);staff.push(p);samples=[];capPhoto=null;
   document.getElementById('eName').value='';document.getElementById('eId').value='';document.getElementById('eRole').value='';
   document.getElementById('cap').innerHTML='<svg class="cap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="cap-hint">Tap to start camera</div>';
   document.getElementById('capBtn').textContent='Capture (0/3)';document.getElementById('capBtn').disabled=true;document.getElementById('enrollBtn').disabled=true;
@@ -344,16 +384,21 @@ function renderRoster(){var l=document.getElementById('rosterList');if(!staff.le
 async function rmStaff(id){staff=staff.filter(function(s){return s.id!==id;});saveStaff();renderRoster();refresh();if(supa){try{await supa.from('employees').delete().eq('id',id);}catch(e){}}toast('Removed','err');}
 window.saveSettings=function(){cfg.company=document.getElementById('sCo').value.trim();cfg.pin=document.getElementById('sPin').value.trim()||DEFAULT_PIN;cfg.url=document.getElementById('sUrl').value.trim();cfg.key=document.getElementById('sKey').value.trim();cfg.late=parseInt(document.getElementById('sLate').value)||15;localStorage.setItem('k_cfg',JSON.stringify(cfg));refresh();toast('Saved','ok');initSupa();};
 window.exportCsv=function(){var rows=[['Name','Role','Check In','Check Out','Hours','Status']];log.forEach(function(l){rows.push([l.name,l.role||'',l.inTime||'',l.outTime||'',l.hours||'',l.late?'Late':'On Time']);});staff.forEach(function(s){if(!log.find(function(l){return l.empId===s.id;}))rows.push([s.name,s.role||'','','','','Absent']);});var blob=new Blob([rows.map(function(r){return r.join(',');}).join('\n')],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='attendance_'+dayKey+'.csv';a.click();toast('CSV downloaded','ok');};
-async function pushEmp(p){try{await supa.from('employees').insert({id:p.id,name:p.name,emp_id:p.empId,role:p.role,shift:p.shift,sigs:p.sigs,photo:p.photo,color:p.color});}catch(e){toast('Cloud save failed — saved locally','err');}}
-async function pushCloud(rec,mode){try{if(mode==='in')await supa.from('attendance').insert({emp_id:rec.empId,date:dayKey,in_time:rec.inTime,late:rec.late});else if(mode==='out')await supa.from('attendance').update({out_time:rec.outTime,hours:rec.hours}).eq('emp_id',rec.empId).eq('date',dayKey);}catch(e){}}
-function saveStaff(){localStorage.setItem('k_staff',JSON.stringify(staff));}
-function saveLog(){localStorage.setItem('k_log_'+dayKey,JSON.stringify(log));}
+async function pushEmp(p){try{await supa.from('employees').insert({id:p.id,company_id:companyId,name:p.name,emp_id:p.empId,role:p.role,shift:p.shift,sigs:p.sigs,photo:p.photo,color:p.color});}catch(e){toast('Cloud save failed — check connection','err');}}
+async function pushCloud(rec,mode){try{if(mode==='in')await supa.from('attendance').insert({company_id:companyId,emp_id:rec.empId,date:dayKey,in_time:rec.inTime,late:rec.late});else if(mode==='out')await supa.from('attendance').update({out_time:rec.outTime,hours:rec.hours}).eq('emp_id',rec.empId).eq('date',dayKey);}catch(e){}}
+function saveStaff(){}
+function saveLog(){}
 function showState(id){hideStates();document.getElementById(id).classList.remove('hidden');}
 function hideStates(){document.querySelectorAll('.state').forEach(function(s){if(s.id!=='loadState')s.classList.add('hidden');});}
 function toast(m,t){var e=document.getElementById('toast');e.textContent=m;e.className='toast show '+(t||'');clearTimeout(e._t);e._t=setTimeout(function(){e.className='toast';},2800);}
 window.startCamera=startCamera;
 
-refresh();initSupa();loadEngine();
+/* BOOT — connect cloud first, then start engine */
+(async function(){
+  setSync(false);
+  await initSupa();
+  loadEngine();
+})();
 </script>
 </body>
 </html>
