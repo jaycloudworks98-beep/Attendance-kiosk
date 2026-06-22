@@ -162,7 +162,7 @@
   <div class="topbar">
     <div class="company">
       <div class="company-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
-      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v2</div></div>
+      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v3</div></div>
     </div>
     <div class="topbar-clock"><div class="tb-time" id="clock">00:00</div><div class="tb-date" id="date">—</div></div>
   </div>
@@ -221,9 +221,9 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+import Human from "https://cdn.jsdelivr.net/npm/@vladmandic/human/dist/human.esm.js";
 
-var SCAN_MS=600, COOLDOWN=8000, HOLD=3400, MATCH_DIST=0.16, CLOSE_WINDOW_MIN=60;
+var SCAN_MS=500, COOLDOWN=8000, HOLD=3400, MATCH_MIN=0.55, CLOSE_WINDOW_MIN=60;
 var audioCtx=null, paused=false, pendingOut=null;
 function getAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}catch(e){return null;}}
 var DEFAULT_PIN='1234';
@@ -238,7 +238,7 @@ var staff=[];
 var dayKey=new Date().toISOString().slice(0,10);
 var log=[];
 var companyId=null;
-var landmarker=null, ready=false, timer=null, lastSeen={}, busy=false, supa=null;
+var human=null, ready=false, timer=null, lastSeen={}, busy=false, supa=null;
 var COLORS=['#2563eb','#10b981','#f59e0b','#7c3aed','#db2777','#0891b2','#ea580c','#4f46e5'];
 var capStream=null,capVid=null,samples=[],capPhoto=null,capFacing='user',capLiveTimer=null;
 
@@ -255,17 +255,17 @@ window.addEventListener('pagehide',function(){pauseKiosk();try{if(audioCtx){audi
 window.addEventListener('blur',function(){try{if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}catch(e){}});
 window.addEventListener('focus',function(){if(!document.hidden)resumeKiosk();});
 
-/* signature from landmarks: normalized by inter-eye distance + rotation aligned */
-var SIG_IDX=[33,263,1,152,10,61,291,199,0,13,14,17,168,6,197,195,5,4,70,105,107,336,334,300,46,53,52,65,55,285,295,282,283,276,78,308,82,312,87,317,88,318,95,324,178,402,234,454,127,356,162,389,93,323,132,361];
-function landmarksToSignature(lm){
-  var L=lm[33],R=lm[263];var dx=R.x-L.x,dy=R.y-L.y;var eyeDist=Math.hypot(dx,dy)||1e-4;
-  var cx=(L.x+R.x)/2,cy=(L.y+R.y)/2;var ang=Math.atan2(dy,dx),ca=Math.cos(-ang),sa=Math.sin(-ang);
-  var sig=[];for(var i=0;i<SIG_IDX.length;i++){var p=lm[SIG_IDX[i]];if(!p){sig.push(0,0);continue;}
-    var rx=p.x-cx,ry=p.y-cy;sig.push((rx*ca-ry*sa)/eyeDist,(rx*sa+ry*ca)/eyeDist);}
-  return sig;
+/* ===== Face matching via Human embeddings (1024-dim descriptors) ===== */
+/* Each enrolled person stores s.sigs = array of embedding vectors (one per angle). */
+function bestMatch(embedding){
+  var best=null,bestSim=0;
+  for(var i=0;i<staff.length;i++){var s=staff[i];if(!s.sigs||!s.sigs.length)continue;
+    for(var j=0;j<s.sigs.length;j++){
+      var sim;try{sim=human.match.similarity(embedding,s.sigs[j]);}catch(e){sim=0;}
+      if(sim>bestSim){bestSim=sim;best=s;}
+    }}
+  return {person:best,sim:bestSim};
 }
-function sigDistance(a,b){if(!a||!b||a.length!==b.length)return 999;var s=0;for(var i=0;i<a.length;i++){var d=a[i]-b[i];s+=d*d;}return Math.sqrt(s/a.length);}
-function bestMatch(sig){var best=null,bestD=999;for(var i=0;i<staff.length;i++){var s=staff[i];if(!s.sigs)continue;for(var j=0;j<s.sigs.length;j++){var d=sigDistance(sig,s.sigs[j]);if(d<bestD){bestD=d;best=s;}}}return{person:best,dist:bestD};}
 
 function setSync(online){var b=document.getElementById('syncBadge'),t=document.getElementById('syncTxt');if(!b)return;b.className='sync'+(online?' online':'');t.textContent=online?'Cloud synced':'Offline';}
 
@@ -298,17 +298,35 @@ async function loadCloud(){
 }
 
 async function loadEngine(){
-  setLoad('Loading recognition engine…','Google MediaPipe — mobile optimized');
-  var modelPath="https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
-  var wasm="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm";
+  setLoad('Loading recognition engine…','High-accuracy face engine — first load may take a moment');
   try{
-    var fileset=await FilesetResolver.forVisionTasks(wasm);
-    landmarker=await FaceLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath:modelPath,delegate:"GPU"},runningMode:"VIDEO",numFaces:1,minFaceDetectionConfidence:0.4,minFacePresenceConfidence:0.4});
+    var config={
+      modelBasePath:'https://vladmandic.github.io/human-models/models/',
+      backend:'humangl',
+      async:true,
+      warmup:'none',
+      cacheSensitivity:0,
+      filter:{enabled:true,equalization:false},
+      face:{
+        enabled:true,
+        detector:{rotation:true,maxDetected:1,minConfidence:0.4,return:false},
+        mesh:{enabled:true},
+        iris:{enabled:false},
+        description:{enabled:true},
+        emotion:{enabled:false},
+        antispoof:{enabled:false},
+        liveness:{enabled:false}
+      },
+      body:{enabled:false},hand:{enabled:false},object:{enabled:false},gesture:{enabled:false}
+    };
+    human=new Human(config);
+    await human.load();
+    await human.warmup();
     ready=true;startCamera();
   }catch(e){
-    try{var fs2=await FilesetResolver.forVisionTasks(wasm);
-      landmarker=await FaceLandmarker.createFromOptions(fs2,{baseOptions:{modelAssetPath:modelPath,delegate:"CPU"},runningMode:"VIDEO",numFaces:1,minFaceDetectionConfidence:0.4});
-      ready=true;startCamera();
+    try{
+      human=new Human({modelBasePath:'https://vladmandic.github.io/human-models/models/',backend:'wasm',async:true,warmup:'none',face:{enabled:true,detector:{rotation:true,maxDetected:1},mesh:{enabled:true},description:{enabled:true},iris:{enabled:false},emotion:{enabled:false}},body:{enabled:false},hand:{enabled:false},object:{enabled:false},gesture:{enabled:false}});
+      await human.load();ready=true;startCamera();
     }catch(e2){setLoad('Engine failed to load','Check internet & reload the page');}
   }
 }
@@ -323,15 +341,21 @@ async function startCamera(){
   }catch(e){document.getElementById('loadState').classList.add('hidden');showState('permState');}
 }
 function scan(){if(timer)clearInterval(timer);timer=setInterval(loop,SCAN_MS);}
-function loop(){
-  if(paused||!ready||busy)return;var v=document.getElementById('video');if(!v.videoWidth)return;
+var scanning=false;
+async function loop(){
+  if(paused||!ready||busy||scanning)return;var v=document.getElementById('video');if(!v.videoWidth)return;
   var enrolled=staff.filter(function(s){return s.sigs&&s.sigs.length;});if(!enrolled.length)return;
-  var res;try{res=landmarker.detectForVideo(v,performance.now());}catch(e){return;}
+  scanning=true;
+  var res;try{res=await human.detect(v);}catch(e){scanning=false;return;}
+  scanning=false;
+  if(paused||busy)return;
   var zone=document.getElementById('scanZone');
-  if(!res||!res.faceLandmarks||!res.faceLandmarks.length){zone.className='scan-zone';setPrompt('Look at the camera','Your attendance is marked automatically');return;}
+  if(!res||!res.face||!res.face.length){zone.className='scan-zone';setPrompt('Look at the camera','Your attendance is marked automatically');return;}
+  var face=res.face[0];
+  if(!face.embedding||!face.embedding.length){zone.className='scan-zone detecting';setPrompt('Hold still…','Reading your face');return;}
   zone.className='scan-zone detecting';
-  var m=bestMatch(landmarksToSignature(res.faceLandmarks[0]));
-  if(!m.person||m.dist>MATCH_DIST){zone.className='scan-zone fail';setPrompt('Face not recognized','Please try again or see admin');return;}
+  var m=bestMatch(face.embedding);
+  if(!m.person||m.sim<MATCH_MIN){zone.className='scan-zone fail';setPrompt('Face not recognized','Please try again or see admin');return;}
   var now=Date.now();if(lastSeen[m.person.id]&&now-lastSeen[m.person.id]<COOLDOWN)return;
   lastSeen[m.person.id]=now;mark(m.person);
 }
@@ -446,22 +470,24 @@ window.capStart=async function(){
     catch(e2){c.innerHTML='<div class="cap-hint">Camera access denied — check permissions in the address bar</div>';}}
 };
 function startCapLive(){if(capLiveTimer)clearInterval(capLiveTimer);
-  capLiveTimer=setInterval(function(){if(!ready||!capVid||!capVid.videoWidth)return;
-    var res;try{res=landmarker.detectForVideo(capVid,performance.now());}catch(e){return;}
+  var liveBusy=false;
+  capLiveTimer=setInterval(async function(){if(!ready||!capVid||!capVid.videoWidth||liveBusy)return;
+    liveBusy=true;var res;try{res=await human.detect(capVid);}catch(e){liveBusy=false;return;}liveBusy=false;
     var live=document.getElementById('capLive');if(!live)return;
-    if(res&&res.faceLandmarks&&res.faceLandmarks.length){live.className='cap-live found';document.getElementById('capLiveTxt').textContent='Face detected ✓';}
-    else{live.className='cap-live';document.getElementById('capLiveTxt').textContent='No face — center your face';}},250);}
+    if(res&&res.face&&res.face.length){live.className='cap-live found';document.getElementById('capLiveTxt').textContent='Face detected ✓';}
+    else{live.className='cap-live';document.getElementById('capLiveTxt').textContent='No face — center your face';}},400);}
 window.capStop=function(){if(capLiveTimer){clearInterval(capLiveTimer);capLiveTimer=null;}if(capStream){capStream.getTracks().forEach(function(t){t.stop();});capStream=null;}};
-window.capAngle=function(){
+window.capAngle=async function(){
   if(!capVid||!capVid.videoWidth){toast('Start camera first','err');return;}
   if(!ready){toast('Engine still loading — wait a moment','err');return;}
-  var res;try{res=landmarker.detectForVideo(capVid,performance.now());}catch(e){toast('Detection error — retry','err');return;}
-  if(!res||!res.faceLandmarks||!res.faceLandmarks.length){toast('No face — wait for green "Face detected" badge','err');return;}
-  samples.push(landmarksToSignature(res.faceLandmarks[0]));
+  var btn=document.getElementById('capBtn');btn.disabled=true;var prevTxt=btn.textContent;btn.textContent='Reading…';
+  var res;try{res=await human.detect(capVid);}catch(e){btn.disabled=false;btn.textContent=prevTxt;toast('Detection error — retry','err');return;}
+  if(!res||!res.face||!res.face.length||!res.face[0].embedding||!res.face[0].embedding.length){btn.disabled=false;btn.textContent=prevTxt;toast('No clear face — wait for green "Face detected" badge','err');return;}
+  samples.push(res.face[0].embedding.slice());
   if(samples.length===1)capPhoto=snapPhoto();
   var d=document.getElementById('cd'+(samples.length-1));if(d)d.classList.add('on');
-  document.getElementById('capBtn').textContent='Capture ('+samples.length+'/3)';
-  if(samples.length>=3){document.getElementById('capBtn').disabled=true;document.getElementById('enrollBtn').disabled=false;toast('All 3 angles captured','ok');}
+  btn.textContent='Capture ('+samples.length+'/3)';btn.disabled=false;
+  if(samples.length>=3){btn.disabled=true;document.getElementById('enrollBtn').disabled=false;toast('All 3 angles captured','ok');}
   else toast('Angle '+samples.length+' captured — turn head slightly','ok');
 };
 function snapPhoto(){var cv=document.createElement('canvas');cv.width=160;cv.height=160;var vw=capVid.videoWidth,vh=capVid.videoHeight,sz=Math.min(vw,vh);cv.getContext('2d').drawImage(capVid,(vw-sz)/2,(vh-sz)/2,sz,sz,0,0,160,160);return cv.toDataURL('image/jpeg',.8);}
