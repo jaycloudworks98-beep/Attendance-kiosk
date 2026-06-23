@@ -172,32 +172,33 @@
   .launch-test:active{color:rgba(255,255,255,.6)}
 
   /* TEST MODE */
-  .testmode{position:fixed;inset:0;z-index:75;background:#0a1322;display:none;flex-direction:column;padding:0}
+  .testmode{position:fixed;inset:0;z-index:75;background:linear-gradient(to bottom,rgba(10,19,34,.82) 0%,rgba(10,19,34,.35) 30%,rgba(10,19,34,.35) 60%,rgba(10,19,34,.9) 100%);display:none;flex-direction:column;padding:0}
   .testmode.show{display:flex}
-  .tm-top{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+  body.testing .scan-zone,body.testing .prompt,body.testing .bottombar,body.testing .topbar,body.testing .result,body.testing .flash,body.testing .sync,body.testing .gear{display:none!important}
+  .tm-top{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;background:rgba(10,19,34,.6);backdrop-filter:blur(8px)}
   .tm-title{color:#fff;font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px}
-  .tm-badge{font-size:11px;font-weight:700;background:rgba(37,99,235,.25);color:#60a5fa;padding:4px 10px;border-radius:20px;letter-spacing:.3px}
-  .tm-exit{background:rgba(255,255,255,.1);border:none;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:9px 16px;border-radius:10px;cursor:pointer}
-  .tm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.08)}
-  .tm-stat{background:#0a1322;padding:16px 8px;text-align:center}
+  .tm-badge{font-size:11px;font-weight:700;background:rgba(37,99,235,.35);color:#93c5fd;padding:4px 10px;border-radius:20px;letter-spacing:.3px}
+  .tm-exit{background:rgba(255,255,255,.15);border:none;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:9px 16px;border-radius:10px;cursor:pointer}
+  .tm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08);backdrop-filter:blur(8px)}
+  .tm-stat{background:rgba(10,19,34,.55);padding:14px 8px;text-align:center}
   .tm-num{font-size:26px;font-weight:900;color:#fff;line-height:1}
   .tm-num.green{color:#34d399}.tm-num.red{color:#f87171}.tm-num.blue{color:#60a5fa}
-  .tm-lbl{font-size:11px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:6px}
-  .tm-prompt{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:rgba(255,255,255,.55);font-size:16px;font-weight:600;padding:30px}
-  .tm-ask{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+  .tm-lbl{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:6px}
+  .tm-prompt{flex:1;display:flex;align-items:flex-end;justify-content:center;text-align:center;color:#fff;font-size:16px;font-weight:600;padding:30px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+  .tm-ask{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(10,19,34,.78);backdrop-filter:blur(10px)}
   .tm-ask.show{display:flex}
-  .tm-ask-photo{width:110px;height:110px;border-radius:26px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:800;background:rgba(37,99,235,.2);color:#60a5fa;border:3px solid rgba(96,165,250,.4);margin-bottom:20px}
+  .tm-ask-photo{width:110px;height:110px;border-radius:26px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:800;background:rgba(37,99,235,.25);color:#93c5fd;border:3px solid rgba(96,165,250,.5);margin-bottom:20px}
   .tm-ask-photo img{width:100%;height:100%;object-fit:cover}
-  .tm-ask-q{color:rgba(255,255,255,.5);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .tm-ask-q{color:rgba(255,255,255,.55);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
   .tm-ask-name{color:#fff;font-size:34px;font-weight:900;letter-spacing:-.5px;margin-top:6px}
-  .tm-ask-sim{color:rgba(255,255,255,.4);font-size:14px;font-weight:600;margin-top:6px}
+  .tm-ask-sim{color:rgba(255,255,255,.5);font-size:14px;font-weight:600;margin-top:6px}
   .tm-ask-btns{display:flex;gap:13px;margin-top:30px;width:100%;max-width:360px}
   .tm-ask-btn{flex:1;padding:18px;border:none;border-radius:15px;font-size:18px;font-weight:800;font-family:inherit;cursor:pointer}
   .tm-ask-btn.yes{background:#059669;color:#fff}
   .tm-ask-btn.no{background:#dc2626;color:#fff}
   .tm-ask-btn:active{transform:scale(.96)}
-  .tm-skip{margin-top:18px;background:none;border:none;color:rgba(255,255,255,.35);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
-  .tm-foot{padding:14px 20px;text-align:center;color:rgba(255,255,255,.4);font-size:13px;border-top:1px solid rgba(255,255,255,.08);min-height:20px}
+  .tm-skip{margin-top:18px;background:none;border:none;color:rgba(255,255,255,.45);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+  .tm-foot{padding:14px 20px;text-align:center;color:#fff;font-size:13px;background:rgba(10,19,34,.6);backdrop-filter:blur(8px);min-height:20px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -207,7 +208,7 @@
   <div class="topbar">
     <div class="company">
       <div class="company-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
-      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v5</div></div>
+      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v6</div></div>
     </div>
     <div class="topbar-clock"><div class="tb-time" id="clock">00:00</div><div class="tb-date" id="date">—</div></div>
   </div>
@@ -295,9 +296,9 @@
     <div id="tEnroll">
       <div class="row"><div class="field"><label class="label">Full name</label><input class="input" id="eName" placeholder="Akash Kumar"></div><div class="field"><label class="label">Employee ID</label><input class="input" id="eId" placeholder="EMP-021"></div></div>
       <div class="row"><div class="field"><label class="label">Role</label><input class="input" id="eRole" placeholder="Factory Worker"></div><div class="field"><label class="label">Shift start</label><input class="input" type="time" id="eShift" value="09:00"></div></div>
-      <div class="field"><label class="label">Face — capture 3 angles (front, left, right)</label>
+      <div class="field"><label class="label">Face — capture 5 angles (front, left, right, up, down)</label>
         <div class="cap" id="cap" onclick="capStart()"><svg class="cap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="cap-hint">Tap to start camera</div></div></div>
-      <div class="bgrp"><button class="btn btn-ghost" id="capBtn" onclick="capAngle()" disabled>Capture (0/3)</button><button class="btn btn-primary" id="enrollBtn" onclick="enroll()" disabled>Enroll</button></div>
+      <div class="bgrp"><button class="btn btn-ghost" id="capBtn" onclick="capAngle()" disabled>Capture (0/5)</button><button class="btn btn-primary" id="enrollBtn" onclick="enroll()" disabled>Enroll</button></div>
     </div>
     <div id="tRoster" style="display:none"><div id="rosterList"></div></div>
     <div id="tSettings" style="display:none">
@@ -490,6 +491,7 @@ var testTotal=0,testRight=0,testWrong=0,testWaiting=false,testCooldownUntil=0;
 window.startTestMode=function(){
   if(!staff.filter(function(s){return s.sigs&&s.sigs.length;}).length){toast('Enroll at least one person first (Admin → Enroll)','err');return;}
   kioskMode='test';testTotal=0;testRight=0;testWrong=0;testWaiting=false;testCooldownUntil=0;
+  document.body.classList.add('testing');
   updateTestStats();
   document.getElementById('launch').classList.add('hidden');
   document.getElementById('tmAsk').classList.remove('show');
@@ -498,7 +500,7 @@ window.startTestMode=function(){
   document.getElementById('tmFoot').textContent='Each match will ask if it was correct. Build up 10+ scans for a meaningful figure.';
   document.getElementById('testmode').classList.add('show');
 };
-window.exitTestMode=function(){kioskMode='idle';testWaiting=false;document.getElementById('testmode').classList.remove('show');document.getElementById('launch').classList.remove('hidden');};
+window.exitTestMode=function(){kioskMode='idle';testWaiting=false;document.body.classList.remove('testing');document.getElementById('testmode').classList.remove('show');document.getElementById('launch').classList.remove('hidden');};
 function testLoop(res){
   if(testWaiting)return;
   if(Date.now()<testCooldownUntil)return;
@@ -652,7 +654,7 @@ window.capStart=async function(){
   var c=document.getElementById('cap');c.innerHTML='';
   capVid=document.createElement('video');capVid.autoplay=true;capVid.muted=true;capVid.playsInline=true;capVid.setAttribute('playsinline','');c.appendChild(capVid);
   var live=document.createElement('div');live.className='cap-live';live.id='capLive';live.innerHTML='<span class="ld"></span><span id="capLiveTxt">Searching…</span>';c.appendChild(live);
-  var pr=document.createElement('div');pr.className='cap-prog';pr.innerHTML='<span>Captured</span><div class="cdots"><div class="cd" id="cd0"></div><div class="cd" id="cd1"></div><div class="cd" id="cd2"></div></div>';c.appendChild(pr);
+  var pr=document.createElement('div');pr.className='cap-prog';pr.innerHTML='<span>Captured</span><div class="cdots"><div class="cd" id="cd0"></div><div class="cd" id="cd1"></div><div class="cd" id="cd2"></div><div class="cd" id="cd3"></div><div class="cd" id="cd4"></div></div>';c.appendChild(pr);
   var flip=document.createElement('button');flip.type='button';flip.className='cap-flip';flip.innerHTML='⟲ Flip';flip.onclick=function(ev){ev.stopPropagation();capFacing=(capFacing==='user'?'environment':'user');capStart();};c.appendChild(flip);
   try{capStop();
     capStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:capFacing},width:{ideal:1280},height:{ideal:720}}});
@@ -686,24 +688,25 @@ window.capAngle=async function(){
   if(conflict&&conflictSim>=0.7){btn.disabled=false;btn.textContent=prevTxt;toast('This face already matches "'+conflict.name+'". Cannot enroll the same person twice.','err');return;}
   // guard: all captured angles of THIS person should be the same face
   if(samples.length){var selfMin=1;for(var k=0;k<samples.length;k++){var ss;try{ss=human.match.similarity(emb,samples[k]);}catch(e){ss=0;}if(ss<selfMin)selfMin=ss;}
-    if(selfMin<0.5){btn.disabled=false;btn.textContent=prevTxt;toast('This looks like a different person than the previous angle — retry','err');return;}}
+    if(selfMin<0.42){btn.disabled=false;btn.textContent=prevTxt;toast('This looks like a different person than the previous angle — retry','err');return;}}
   samples.push(emb);
   if(samples.length===1)capPhoto=snapPhoto();
   var d=document.getElementById('cd'+(samples.length-1));if(d)d.classList.add('on');
-  btn.textContent='Capture ('+samples.length+'/3)';btn.disabled=false;
-  if(samples.length>=3){btn.disabled=true;document.getElementById('enrollBtn').disabled=false;toast('All 3 angles captured','ok');}
-  else toast('Angle '+samples.length+' captured — turn head slightly','ok');
+  btn.textContent='Capture ('+samples.length+'/5)';btn.disabled=false;
+  var hints=['turn head slightly LEFT','now turn slightly RIGHT','now tilt head UP a little','now tilt head DOWN a little'];
+  if(samples.length>=5){btn.disabled=true;document.getElementById('enrollBtn').disabled=false;toast('All 5 angles captured ✓','ok');}
+  else toast('Angle '+samples.length+' captured — '+hints[samples.length-1],'ok');
 };
 function snapPhoto(){var cv=document.createElement('canvas');cv.width=160;cv.height=160;var vw=capVid.videoWidth,vh=capVid.videoHeight,sz=Math.min(vw,vh);cv.getContext('2d').drawImage(capVid,(vw-sz)/2,(vh-sz)/2,sz,sz,0,0,160,160);return cv.toDataURL('image/jpeg',.8);}
 window.enroll=async function(){
   var name=document.getElementById('eName').value.trim();if(!name){toast('Enter name','err');return;}
-  if(samples.length<3){toast('Capture all 3 angles','err');return;}
+  if(samples.length<5){toast('Capture all 5 angles','err');return;}
   if(!supa||!companyId){toast('Not connected to cloud — cannot enroll. Check internet & reload.','err');return;}
   var p={id:'emp_'+Date.now(),name:name,empId:document.getElementById('eId').value.trim(),role:document.getElementById('eRole').value.trim()||'Staff',shift:document.getElementById('eShift').value||'09:00',sigs:samples.slice(),photo:capPhoto,color:COLORS[staff.length%COLORS.length]};
   await pushEmp(p);staff.push(p);samples=[];capPhoto=null;
   document.getElementById('eName').value='';document.getElementById('eId').value='';document.getElementById('eRole').value='';
   document.getElementById('cap').innerHTML='<svg class="cap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="cap-hint">Tap to start camera</div>';
-  document.getElementById('capBtn').textContent='Capture (0/3)';document.getElementById('capBtn').disabled=true;document.getElementById('enrollBtn').disabled=true;
+  document.getElementById('capBtn').textContent='Capture (0/5)';document.getElementById('capBtn').disabled=true;document.getElementById('enrollBtn').disabled=true;
   capStop();hideStates();toast(name+' enrolled','ok');renderRoster();
 };
 function renderRoster(){var l=document.getElementById('rosterList');if(!staff.length){l.innerHTML='<div class="empty">No staff enrolled. Use the Enroll tab.</div>';return;}
