@@ -153,6 +153,51 @@
   .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:14px 24px;border-radius:13px;font-size:14px;font-weight:600;z-index:200;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:90vw;text-align:center}
   .toast.show{transform:translateX(-50%) translateY(0)}
   .toast.ok{background:var(--green)}.toast.err{background:var(--red)}
+  /* LAUNCH SCREEN */
+  .launch{position:fixed;inset:0;z-index:70;background:linear-gradient(160deg,#0f1b33,#0a1322);display:flex;align-items:center;justify-content:center;padding:28px}
+  .launch.hidden{display:none}
+  .launch-inner{text-align:center;width:100%;max-width:420px}
+  .launch-logo{width:74px;height:74px;border-radius:20px;background:linear-gradient(135deg,#2563eb,#1e3a8a);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;box-shadow:0 12px 34px rgba(37,99,235,.45)}
+  .launch-logo svg{width:38px;height:38px;color:#fff}
+  .launch-co{font-size:30px;font-weight:900;color:#fff;letter-spacing:-.6px}
+  .launch-sub{font-size:15px;color:rgba(255,255,255,.5);font-weight:600;margin-top:6px;margin-bottom:38px}
+  .launch-actions{display:flex;flex-direction:column;gap:13px}
+  .launch-btn{display:flex;align-items:center;justify-content:center;gap:11px;padding:20px;border-radius:16px;font-size:18px;font-weight:800;font-family:inherit;cursor:pointer;border:none;transition:.15s}
+  .launch-btn svg{width:23px;height:23px}
+  .launch-btn.primary{background:#2563eb;color:#fff;box-shadow:0 10px 28px rgba(37,99,235,.4)}
+  .launch-btn.primary:active{transform:scale(.97)}
+  .launch-btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18)}
+  .launch-btn.ghost:active{transform:scale(.97)}
+  .launch-test{margin-top:34px;background:none;border:none;color:rgba(255,255,255,.25);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;letter-spacing:.5px;padding:8px 16px;border-radius:8px}
+  .launch-test:active{color:rgba(255,255,255,.6)}
+
+  /* TEST MODE */
+  .testmode{position:fixed;inset:0;z-index:75;background:#0a1322;display:none;flex-direction:column;padding:0}
+  .testmode.show{display:flex}
+  .tm-top{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .tm-title{color:#fff;font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px}
+  .tm-badge{font-size:11px;font-weight:700;background:rgba(37,99,235,.25);color:#60a5fa;padding:4px 10px;border-radius:20px;letter-spacing:.3px}
+  .tm-exit{background:rgba(255,255,255,.1);border:none;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:9px 16px;border-radius:10px;cursor:pointer}
+  .tm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.08)}
+  .tm-stat{background:#0a1322;padding:16px 8px;text-align:center}
+  .tm-num{font-size:26px;font-weight:900;color:#fff;line-height:1}
+  .tm-num.green{color:#34d399}.tm-num.red{color:#f87171}.tm-num.blue{color:#60a5fa}
+  .tm-lbl{font-size:11px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:6px}
+  .tm-prompt{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:rgba(255,255,255,.55);font-size:16px;font-weight:600;padding:30px}
+  .tm-ask{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+  .tm-ask.show{display:flex}
+  .tm-ask-photo{width:110px;height:110px;border-radius:26px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:800;background:rgba(37,99,235,.2);color:#60a5fa;border:3px solid rgba(96,165,250,.4);margin-bottom:20px}
+  .tm-ask-photo img{width:100%;height:100%;object-fit:cover}
+  .tm-ask-q{color:rgba(255,255,255,.5);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .tm-ask-name{color:#fff;font-size:34px;font-weight:900;letter-spacing:-.5px;margin-top:6px}
+  .tm-ask-sim{color:rgba(255,255,255,.4);font-size:14px;font-weight:600;margin-top:6px}
+  .tm-ask-btns{display:flex;gap:13px;margin-top:30px;width:100%;max-width:360px}
+  .tm-ask-btn{flex:1;padding:18px;border:none;border-radius:15px;font-size:18px;font-weight:800;font-family:inherit;cursor:pointer}
+  .tm-ask-btn.yes{background:#059669;color:#fff}
+  .tm-ask-btn.no{background:#dc2626;color:#fff}
+  .tm-ask-btn:active{transform:scale(.96)}
+  .tm-skip{margin-top:18px;background:none;border:none;color:rgba(255,255,255,.35);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+  .tm-foot{padding:14px 20px;text-align:center;color:rgba(255,255,255,.4);font-size:13px;border-top:1px solid rgba(255,255,255,.08);min-height:20px}
 </style>
 </head>
 <body>
@@ -162,7 +207,7 @@
   <div class="topbar">
     <div class="company">
       <div class="company-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
-      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v4</div></div>
+      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v5</div></div>
     </div>
     <div class="topbar-clock"><div class="tb-time" id="clock">00:00</div><div class="tb-date" id="date">—</div></div>
   </div>
@@ -196,6 +241,53 @@
 <div class="state hidden" id="permState"><svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><div class="state-title">Camera access needed</div><div class="state-sub">This kiosk needs the camera to mark attendance. Tap below and allow access.</div><button class="state-btn" onclick="startCamera()">Enable Camera</button></div>
 <div class="state hidden" id="setupState"><svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><div class="state-title">No staff enrolled</div><div class="state-sub">An administrator needs to enroll employees before the kiosk can recognize faces.</div><button class="state-btn" onclick="askPin()">Admin Login</button></div>
 <div class="pinwrap" id="pinwrap"><div class="pinbox"><div class="pin-title">Admin PIN</div><div class="pin-sub">Enter PIN to manage staff &amp; settings</div><div class="pin-dots" id="pinDots"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div><div class="pin-grid"><button class="pin-key" onclick="pinPress('1')">1</button><button class="pin-key" onclick="pinPress('2')">2</button><button class="pin-key" onclick="pinPress('3')">3</button><button class="pin-key" onclick="pinPress('4')">4</button><button class="pin-key" onclick="pinPress('5')">5</button><button class="pin-key" onclick="pinPress('6')">6</button><button class="pin-key" onclick="pinPress('7')">7</button><button class="pin-key" onclick="pinPress('8')">8</button><button class="pin-key" onclick="pinPress('9')">9</button><button class="pin-key fn" onclick="pinClear()">Clear</button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key fn" onclick="pinDel()">⌫</button></div><button class="pin-cancel" onclick="closePin()">Cancel</button></div></div>
+
+<!-- LAUNCH SCREEN (first thing shown) -->
+<div class="launch" id="launch">
+  <div class="launch-inner">
+    <div class="launch-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
+    <div class="launch-co" id="launchCo">Attendance</div>
+    <div class="launch-sub">Face-recognition attendance</div>
+    <div class="launch-actions">
+      <button class="launch-btn primary" onclick="startAttendance()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        Mark Attendance
+      </button>
+      <button class="launch-btn ghost" onclick="askPin()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        Admin
+      </button>
+    </div>
+    <button class="launch-test" onclick="startTestMode()">Test Mode</button>
+  </div>
+</div>
+
+<!-- TEST MODE OVERLAY -->
+<div class="testmode" id="testmode">
+  <div class="tm-top">
+    <div class="tm-title">Test Mode <span class="tm-badge">Accuracy check</span></div>
+    <button class="tm-exit" onclick="exitTestMode()">Exit</button>
+  </div>
+  <div class="tm-stats">
+    <div class="tm-stat"><div class="tm-num" id="tmTotal">0</div><div class="tm-lbl">Scans</div></div>
+    <div class="tm-stat"><div class="tm-num green" id="tmRight">0</div><div class="tm-lbl">Correct</div></div>
+    <div class="tm-stat"><div class="tm-num red" id="tmWrong">0</div><div class="tm-lbl">Wrong</div></div>
+    <div class="tm-stat"><div class="tm-num blue" id="tmAcc">—</div><div class="tm-lbl">Accuracy</div></div>
+  </div>
+  <div class="tm-prompt" id="tmPrompt">Look at the camera — testing recognition…</div>
+  <div class="tm-ask" id="tmAsk">
+    <div class="tm-ask-photo" id="tmAskPhoto">—</div>
+    <div class="tm-ask-q">Recognized as</div>
+    <div class="tm-ask-name" id="tmAskName">—</div>
+    <div class="tm-ask-sim" id="tmAskSim">—</div>
+    <div class="tm-ask-btns">
+      <button class="tm-ask-btn yes" onclick="testAnswer(true)">✓ Correct</button>
+      <button class="tm-ask-btn no" onclick="testAnswer(false)">✗ Wrong</button>
+    </div>
+    <button class="tm-skip" onclick="testSkip()">Not me / skip</button>
+  </div>
+  <div class="tm-foot" id="tmFoot"></div>
+</div>
 <div class="overlay" id="overlay"><div class="modal">
   <div class="modal-head"><div class="modal-title">Admin</div><button class="x-btn" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
   <div class="mtabs"><button class="mtab active" onclick="mtab('enroll',this)">Enroll</button><button class="mtab" onclick="mtab('roster',this)">Staff</button><button class="mtab" onclick="mtab('settings',this)">Settings</button></div>
@@ -344,18 +436,32 @@ async function startCamera(){
   try{var stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}}});
     var v=document.getElementById('video');v.srcObject=stream;await v.play();
     document.getElementById('loadState').classList.add('hidden');
-    if(!staff.filter(function(s){return s.sigs;}).length)showState('setupState');scan();
+    document.getElementById('launchCo').textContent=cfg.company||'Attendance';
+    document.getElementById('launch').classList.remove('hidden');
+    scan();
   }catch(e){document.getElementById('loadState').classList.add('hidden');showState('permState');}
 }
+var kioskMode='idle'; // idle | attendance | test
+window.startAttendance=function(){
+  if(!staff.filter(function(s){return s.sigs&&s.sigs.length;}).length){document.getElementById('launch').classList.add('hidden');showState('setupState');return;}
+  kioskMode='attendance';document.getElementById('launch').classList.add('hidden');
+  setPrompt('Look at the camera','Your attendance is marked automatically');
+};
+window.backToLaunch=function(){kioskMode='idle';busy=false;hideStates();document.getElementById('launch').classList.remove('hidden');};
 function scan(){if(timer)clearInterval(timer);timer=setInterval(loop,SCAN_MS);}
 var scanning=false, confirmId=null, confirmCount=0;
 async function loop(){
-  if(paused||!ready||busy||scanning)return;var v=document.getElementById('video');if(!v.videoWidth)return;
+  if(paused||!ready||busy||scanning)return;
+  if(kioskMode==='idle')return; // launch screen showing, don't scan
+  var v=document.getElementById('video');if(!v.videoWidth)return;
   var enrolled=staff.filter(function(s){return s.sigs&&s.sigs.length;});if(!enrolled.length)return;
   scanning=true;
   var res;try{res=await human.detect(v);}catch(e){scanning=false;return;}
   scanning=false;
-  if(paused||busy)return;
+  if(paused||busy||kioskMode==='idle')return;
+
+  if(kioskMode==='test'){return testLoop(res);}
+
   var zone=document.getElementById('scanZone');
   if(!res||!res.face||!res.face.length){zone.className='scan-zone';confirmId=null;confirmCount=0;setPrompt('Look at the camera','Your attendance is marked automatically');return;}
   // reject if more than one face in frame (avoids wrong person)
@@ -377,6 +483,71 @@ async function loop(){
   confirmId=null;confirmCount=0;
   var now=Date.now();if(lastSeen[m.person.id]&&now-lastSeen[m.person.id]<COOLDOWN)return;
   lastSeen[m.person.id]=now;mark(m.person);
+}
+
+/* ===== TEST MODE ===== */
+var testTotal=0,testRight=0,testWrong=0,testWaiting=false,testCooldownUntil=0;
+window.startTestMode=function(){
+  if(!staff.filter(function(s){return s.sigs&&s.sigs.length;}).length){toast('Enroll at least one person first (Admin → Enroll)','err');return;}
+  kioskMode='test';testTotal=0;testRight=0;testWrong=0;testWaiting=false;testCooldownUntil=0;
+  updateTestStats();
+  document.getElementById('launch').classList.add('hidden');
+  document.getElementById('tmAsk').classList.remove('show');
+  document.getElementById('tmPrompt').style.display='flex';
+  document.getElementById('tmPrompt').textContent='Look at the camera — testing recognition…';
+  document.getElementById('tmFoot').textContent='Each match will ask if it was correct. Build up 10+ scans for a meaningful figure.';
+  document.getElementById('testmode').classList.add('show');
+};
+window.exitTestMode=function(){kioskMode='idle';testWaiting=false;document.getElementById('testmode').classList.remove('show');document.getElementById('launch').classList.remove('hidden');};
+function testLoop(res){
+  if(testWaiting)return;
+  if(Date.now()<testCooldownUntil)return;
+  if(!res||!res.face||!res.face.length){document.getElementById('tmPrompt').textContent='Look at the camera — testing recognition…';return;}
+  if(res.face.length>1){document.getElementById('tmPrompt').textContent='One person at a time';return;}
+  var face=res.face[0];
+  if(!face.embedding||!face.embedding.length){document.getElementById('tmPrompt').textContent='Hold still… reading your face';return;}
+  if(face.score!==undefined&&face.score<0.6){document.getElementById('tmPrompt').textContent='Face the screen directly';return;}
+  var m=bestMatch(face.embedding);
+  if(!m.person||m.sim<MATCH_MIN||(m.sim-m.runnerSim)<MATCH_MARGIN){
+    document.getElementById('tmPrompt').textContent='Not recognized — move closer or improve lighting';return;
+  }
+  // got a confident match -> ask user
+  testWaiting=true;testPending=m;
+  var p=m.person;
+  var ph=document.getElementById('tmAskPhoto');var ini=p.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  if(p.photo)ph.innerHTML='<img src="'+p.photo+'">';else{ph.innerHTML='';ph.textContent=ini;}
+  document.getElementById('tmAskName').textContent=p.name;
+  document.getElementById('tmAskSim').textContent='Confidence '+Math.round(m.sim*100)+'%  ·  margin '+Math.round((m.sim-m.runnerSim)*100)+'%';
+  document.getElementById('tmPrompt').style.display='none';
+  document.getElementById('tmAsk').classList.add('show');
+}
+var testPending=null;
+window.testAnswer=function(correct){
+  testTotal++;if(correct)testRight++;else testWrong++;
+  updateTestStats();closeTestAsk();
+};
+window.testSkip=function(){closeTestAsk();}; // not counted
+function closeTestAsk(){
+  testPending=null;testWaiting=false;testCooldownUntil=Date.now()+2500;
+  document.getElementById('tmAsk').classList.remove('show');
+  document.getElementById('tmPrompt').style.display='flex';
+  document.getElementById('tmPrompt').textContent='Next person — look at the camera…';
+}
+function updateTestStats(){
+  document.getElementById('tmTotal').textContent=testTotal;
+  document.getElementById('tmRight').textContent=testRight;
+  document.getElementById('tmWrong').textContent=testWrong;
+  var acc=testTotal?Math.round((testRight/testTotal)*100):null;
+  document.getElementById('tmAcc').textContent=acc===null?'—':acc+'%';
+  if(testTotal>=1){
+    var verdict='';
+    if(testTotal<10)verdict='Keep going — '+(10-testTotal)+' more scan'+(10-testTotal===1?'':'s')+' for a reliable figure.';
+    else if(acc>=97)verdict='Excellent — this model is ready to ship. ✅';
+    else if(acc>=90)verdict='Good. Re-enrol the few that failed, then it\u2019s ship-ready.';
+    else if(acc>=75)verdict='Fair. Improve lighting & re-enrol faces with 3 clear angles.';
+    else verdict='Low accuracy — re-enrol everyone in good light, faces centred.';
+    document.getElementById('tmFoot').textContent=verdict;
+  }
 }
 function setPrompt(t,s){document.getElementById('promptText').textContent=t;document.getElementById('promptSub').textContent=s;}
 
@@ -470,9 +641,10 @@ window.pinClear=function(){pinBuf='';renderPin();};
 function renderPin(err){var dots=document.querySelectorAll('#pinDots .pin-dot');dots.forEach(function(d,i){d.className='pin-dot'+(i<pinBuf.length?' filled':'')+(err?' err':'');});}
 function checkPin(){var correct=cfg.pin||DEFAULT_PIN;if(pinBuf===correct){closePin();openModal();}else{renderPin(true);setTimeout(function(){pinBuf='';renderPin();},500);}}
 
-function openModal(){document.getElementById('overlay').classList.add('open');renderRoster();
+function openModal(){adminPrevMode=kioskMode;kioskMode='idle';document.getElementById('overlay').classList.add('open');renderRoster();
   document.getElementById('sCo').value=cfg.company||'';document.getElementById('sPin').value=cfg.pin||'';document.getElementById('sUrl').value=cfg.url||'';document.getElementById('sKey').value=cfg.key||'';document.getElementById('sLate').value=cfg.late||15;}
-window.closeModal=function(){document.getElementById('overlay').classList.remove('open');capStop();};
+var adminPrevMode='idle';
+window.closeModal=function(){document.getElementById('overlay').classList.remove('open');capStop();kioskMode='idle';hideStates();document.getElementById('testmode').classList.remove('show');document.getElementById('launchCo').textContent=cfg.company||'Attendance';document.getElementById('launch').classList.remove('hidden');};
 window.mtab=function(t,b){document.querySelectorAll('.mtab').forEach(function(x){x.classList.remove('active');});b.classList.add('active');
   document.getElementById('tEnroll').style.display=t==='enroll'?'block':'none';document.getElementById('tRoster').style.display=t==='roster'?'block':'none';document.getElementById('tSettings').style.display=t==='settings'?'block':'none';if(t==='roster')renderRoster();};
 
