@@ -220,7 +220,7 @@
   <div class="topbar">
     <div class="company">
       <div class="company-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
-      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v11</div></div>
+      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v12</div></div>
     </div>
     <div class="topbar-clock"><div class="tb-time" id="clock">00:00</div><div class="tb-date" id="date">—</div></div>
   </div>
@@ -389,7 +389,9 @@ async function initSupa(){
     var r=await supa.rpc('company_public',{p_slug:COMPANY_SLUG});
     if(r.error){blockKiosk({title:'Setup issue',msg:'Database error: '+(r.error.message||'unknown')+'. Reload the page.'});return;}
     var found=(r.data&&r.data.length)?r.data[0]:null;
-    if(found){companyId=found.id;cfg.company=found.name;if(found.late_after)cfg.late=found.late_after;
+    if(found){
+      if(!found.id){blockKiosk({title:'Update needed',msg:'Company data is loading without an ID — the database function needs updating. Please contact support.'});return;}
+      companyId=found.id;cfg.company=found.name;if(found.late_after)cfg.late=found.late_after;
       var st=kioskAccess(found);
       if(!st.ok){blockKiosk(st);return;}
     }
@@ -422,11 +424,12 @@ async function loadCloud(){
   if(!supa||!companyId)return;
   try{
     var r=await supa.from('employees').select('*').eq('company_id',companyId);
+    if(r.error){setSync(false);toast('Could not load staff: '+(r.error.message||'error'),'err');return;}
     if(r.data){staff=r.data.map(function(e){return{id:e.id,name:e.name,empId:e.emp_id,role:e.role,shift:e.shift,shiftEnd:e.shift_end||'18:00',sigs:e.sigs,photo:e.photo,color:e.color||COLORS[0]};});}
     var a=await supa.from('attendance').select('*').eq('company_id',companyId).eq('date',dayKey);
     if(a.data){log=a.data.map(function(x){var emp=staff.find(function(s){return s.id===x.emp_id;});return{empId:x.emp_id,name:emp?emp.name:'',role:emp?emp.role:'',photo:emp?emp.photo:null,color:emp?emp.color:COLORS[0],inTime:x.in_time,inTs:Date.now(),outTime:x.out_time,hours:x.hours,late:x.late};});}
     if(staff.filter(function(s){return s.sigs;}).length){hideStates();}
-  }catch(e){}
+  }catch(e){setSync(false);}
 }
 
 async function loadEngine(){
@@ -795,3 +798,4 @@ window.addEventListener('error',function(ev){
 </script>
 </body>
 </html>
+
