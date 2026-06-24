@@ -190,4 +190,608 @@
   .tm-title{color:#fff;font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px}
   .tm-badge{font-size:11px;font-weight:700;background:rgba(37,99,235,.35);color:#93c5fd;padding:4px 10px;border-radius:20px;letter-spacing:.3px}
   .tm-exit{background:rgba(255,255,255,.15);border:none;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:9px 16px;border-radius:10px;cursor:pointer}
-  .tm-stats{display:grid;grid-template-columns:repe
+  .tm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08);backdrop-filter:blur(8px)}
+  .tm-stat{background:rgba(10,19,34,.55);padding:14px 8px;text-align:center}
+  .tm-num{font-size:26px;font-weight:900;color:#fff;line-height:1}
+  .tm-num.green{color:#34d399}.tm-num.red{color:#f87171}.tm-num.blue{color:#60a5fa}
+  .tm-lbl{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:6px}
+  .tm-prompt{flex:1;display:flex;align-items:flex-end;justify-content:center;text-align:center;color:#fff;font-size:16px;font-weight:600;padding:30px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+  .tm-ask{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(10,19,34,.78);backdrop-filter:blur(10px)}
+  .tm-ask.show{display:flex}
+  .tm-ask-photo{width:110px;height:110px;border-radius:26px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:800;background:rgba(37,99,235,.25);color:#93c5fd;border:3px solid rgba(96,165,250,.5);margin-bottom:20px}
+  .tm-ask-photo img{width:100%;height:100%;object-fit:cover}
+  .tm-ask-q{color:rgba(255,255,255,.55);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .tm-ask-name{color:#fff;font-size:34px;font-weight:900;letter-spacing:-.5px;margin-top:6px}
+  .tm-ask-sim{color:rgba(255,255,255,.5);font-size:14px;font-weight:600;margin-top:6px}
+  .tm-ask-btns{display:flex;gap:13px;margin-top:30px;width:100%;max-width:360px}
+  .tm-ask-btn{flex:1;padding:18px;border:none;border-radius:15px;font-size:18px;font-weight:800;font-family:inherit;cursor:pointer}
+  .tm-ask-btn.yes{background:#059669;color:#fff}
+  .tm-ask-btn.no{background:#dc2626;color:#fff}
+  .tm-ask-btn:active{transform:scale(.96)}
+  .tm-skip{margin-top:18px;background:none;border:none;color:rgba(255,255,255,.45);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+  .tm-foot{padding:14px 20px;text-align:center;color:#fff;font-size:13px;background:rgba(10,19,34,.6);backdrop-filter:blur(8px);min-height:20px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+</style>
+</head>
+<body>
+<div class="kiosk">
+  <video id="video" autoplay muted playsinline></video>
+  <div class="lightframe"></div>
+  <div class="vignette"></div>
+  <div class="topbar">
+    <div class="company">
+      <div class="company-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
+      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v11</div></div>
+    </div>
+    <div class="topbar-clock"><div class="tb-time" id="clock">00:00</div><div class="tb-date" id="date">—</div></div>
+  </div>
+  <div class="scan-zone" id="scanZone"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div><div class="scan-line"></div></div>
+  <div class="prompt" id="prompt"><div class="prompt-text" id="promptText">Look at the camera</div><div class="prompt-sub" id="promptSub">Your attendance is marked automatically</div></div>
+  <div class="result" id="result">
+    <div class="res-photo" id="resPhoto">—</div>
+    <div class="res-body"><div class="res-greet" id="resGreet">Welcome</div><div class="res-name" id="resName">—</div><div class="res-status in" id="resStatus">Checked in</div></div>
+    <div class="res-time"><div class="res-time-big" id="resTime">—</div><div class="res-time-label" id="resTimeLabel">Check-in</div><div class="res-hours" id="resHours"></div></div>
+  </div>
+  <div class="flash" id="flash">
+    <div class="flash-inner">
+      <div class="flash-photo" id="flashPhoto">—</div>
+      <div class="flash-icon" id="flashIcon"></div>
+      <div class="flash-title" id="flashTitle">—</div>
+      <div class="flash-name" id="flashName">—</div>
+      <div class="flash-time" id="flashTime">—</div>
+      <div class="flash-note" id="flashNote"></div>
+      <div class="flash-actions" id="flashActions"></div>
+    </div>
+  </div>
+  <div class="bottombar">
+    <div class="bcount"><div class="bcount-num green" id="cIn">0</div><div class="bcount-label">Checked in today</div></div>
+    <div class="bcount-div"></div>
+    <div class="bcount"><div class="bcount-num blue" id="cOut">0</div><div class="bcount-label">Checked out</div></div>
+  </div>
+  <div class="sync" id="syncBadge"><span class="sd"></span><span id="syncTxt">Local</span></div>
+  <div class="kiosk-refresh" onclick="refreshScan()" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+  <div class="gear" onclick="askPin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span>Admin</span></div>
+</div>
+<div class="state" id="loadState"><div class="ring"></div><div class="state-title" id="loadTitle">Starting…</div><div class="state-sub" id="loadSub">Loading recognition engine</div></div>
+<div class="state hidden" id="permState"><svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><div class="state-title">Camera access needed</div><div class="state-sub">This kiosk needs the camera to mark attendance. Tap below and allow access.</div><button class="state-btn" onclick="startCamera()">Enable Camera</button></div>
+<div class="state hidden" id="setupState"><svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><div class="state-title">No staff enrolled</div><div class="state-sub">An administrator needs to enroll employees before the kiosk can recognize faces.</div><button class="state-btn" onclick="askPin()">Admin Login</button></div>
+<div class="pinwrap" id="pinwrap"><div class="pinbox"><div class="pin-title">Admin PIN</div><div class="pin-sub">Enter PIN to manage staff &amp; settings</div><div class="pin-dots" id="pinDots"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div><div class="pin-grid"><button class="pin-key" onclick="pinPress('1')">1</button><button class="pin-key" onclick="pinPress('2')">2</button><button class="pin-key" onclick="pinPress('3')">3</button><button class="pin-key" onclick="pinPress('4')">4</button><button class="pin-key" onclick="pinPress('5')">5</button><button class="pin-key" onclick="pinPress('6')">6</button><button class="pin-key" onclick="pinPress('7')">7</button><button class="pin-key" onclick="pinPress('8')">8</button><button class="pin-key" onclick="pinPress('9')">9</button><button class="pin-key fn" onclick="pinClear()">Clear</button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key fn" onclick="pinDel()">⌫</button></div><button class="pin-cancel" onclick="closePin()">Cancel</button></div></div>
+
+<!-- LAUNCH SCREEN (first thing shown) -->
+<div class="launch" id="launch">
+  <div class="launch-inner">
+    <div class="launch-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
+    <div class="launch-co" id="launchCo">Attendance</div>
+    <div class="launch-sub">Face-recognition attendance</div>
+    <div class="launch-actions">
+      <button class="launch-btn primary" onclick="startAttendance()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        Mark Attendance
+      </button>
+      <button class="launch-btn ghost" onclick="askPin()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        Admin
+      </button>
+    </div>
+    <button class="launch-test" onclick="startTestMode()">Test Mode</button>
+  </div>
+</div>
+
+<!-- TEST MODE OVERLAY -->
+<div class="testmode" id="testmode">
+  <div class="tm-top">
+    <div class="tm-title">Test Mode <span class="tm-badge">Accuracy check</span></div>
+    <button class="tm-exit" onclick="exitTestMode()">Exit</button>
+  </div>
+  <div class="tm-stats">
+    <div class="tm-stat"><div class="tm-num" id="tmTotal">0</div><div class="tm-lbl">Scans</div></div>
+    <div class="tm-stat"><div class="tm-num green" id="tmRight">0</div><div class="tm-lbl">Correct</div></div>
+    <div class="tm-stat"><div class="tm-num red" id="tmWrong">0</div><div class="tm-lbl">Wrong</div></div>
+    <div class="tm-stat"><div class="tm-num blue" id="tmAcc">—</div><div class="tm-lbl">Accuracy</div></div>
+  </div>
+  <div class="tm-prompt" id="tmPrompt">Look at the camera — testing recognition…</div>
+  <div class="tm-ask" id="tmAsk">
+    <div class="tm-ask-photo" id="tmAskPhoto">—</div>
+    <div class="tm-ask-q">Recognized as</div>
+    <div class="tm-ask-name" id="tmAskName">—</div>
+    <div class="tm-ask-sim" id="tmAskSim">—</div>
+    <div class="tm-ask-btns">
+      <button class="tm-ask-btn yes" onclick="testAnswer(true)">✓ Correct</button>
+      <button class="tm-ask-btn no" onclick="testAnswer(false)">✗ Wrong</button>
+    </div>
+    <button class="tm-skip" onclick="testSkip()">Not me / skip</button>
+  </div>
+  <div class="tm-foot" id="tmFoot"></div>
+</div>
+<div class="overlay" id="overlay"><div class="modal">
+  <div class="modal-head"><div class="modal-title">Admin</div><button class="x-btn" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="mtabs"><button class="mtab active" onclick="mtab('enroll',this)">Enroll</button><button class="mtab" onclick="mtab('roster',this)">Staff</button><button class="mtab" onclick="mtab('settings',this)">Settings</button></div>
+  <div class="mbody">
+    <div id="tEnroll">
+      <div class="row"><div class="field"><label class="label">Full name</label><input class="input" id="eName" placeholder="Akash Kumar"></div><div class="field"><label class="label">Employee ID</label><input class="input" id="eId" placeholder="EMP-021"></div></div>
+      <div class="row"><div class="field"><label class="label">Role</label><input class="input" id="eRole" placeholder="Factory Worker"></div><div class="field"><label class="label">Shift start</label><input class="input" type="time" id="eShift" value="09:00"></div></div>
+      <div class="field"><label class="label">Face — capture 5 angles (front, left, right, up, down)</label>
+        <div class="cap" id="cap" onclick="capStart()"><svg class="cap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="cap-hint">Tap to start camera</div></div></div>
+      <div class="bgrp"><button class="btn btn-ghost" id="capBtn" onclick="capAngle()" disabled>Capture (0/5)</button><button class="btn btn-primary" id="enrollBtn" onclick="enroll()" disabled>Enroll</button></div>
+    </div>
+    <div id="tRoster" style="display:none"><div id="rosterList"></div></div>
+    <div id="tSettings" style="display:none">
+      <div class="note"><strong>Local mode.</strong> Data is on this device only. To sync across devices &amp; go live as SaaS, add your Supabase URL + key below.</div>
+      <div class="field"><label class="label">Company name</label><input class="input" id="sCo" placeholder="VK Furnishing"></div>
+      <div class="row"><div class="field"><label class="label">Admin PIN (4-digit)</label><input class="input" id="sPin" maxlength="4" placeholder="1234"></div><div class="field"><label class="label">Late after (min)</label><input class="input" type="number" id="sLate" value="15"></div></div>
+      <div class="field"><label class="label">Supabase URL</label><input class="input" id="sUrl" placeholder="https://xxxxx.supabase.co"></div>
+      <div class="field"><label class="label">Supabase anon key</label><input class="input" id="sKey" placeholder="eyJhbGci..."></div>
+      <div class="bgrp"><button class="btn btn-ghost" onclick="exportCsv()">Export today (CSV)</button><button class="btn btn-primary" onclick="saveSettings()">Save</button></div>
+    </div>
+  </div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import Human from "https://cdn.jsdelivr.net/npm/@vladmandic/human/dist/human.esm.js";
+
+var SCAN_MS=400, COOLDOWN=8000, HOLD=3400, MATCH_MIN=0.62, MATCH_MARGIN=0.06, CONFIRM_FRAMES=2, CLOSE_WINDOW_MIN=60;
+var audioCtx=null, paused=false, pendingOut=null;
+function getAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}catch(e){return null;}}
+var DEFAULT_PIN='1234';
+
+/* ===== CLOUD CONFIG (hardcoded — shared across all devices) ===== */
+var SUPA_URL='https://ptwcqpoijortkvnfkavl.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0d2NxcG9pam9ydGt2bmZrYXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMDY2NjIsImV4cCI6MjA5NzY4MjY2Mn0.O4ifEiqqclNI1pPnhsXXFVoFxEZYA-qRPk4e_DIfqOk';
+var COMPANY_SLUG=(new URLSearchParams(location.search).get('company')||'vkfurnishing').toLowerCase().replace(/[^a-z0-9-]/g,'');
+
+var cfg=JSON.parse(localStorage.getItem('k_cfg')||'{}');
+var staff=[];
+var dayKey=new Date().toISOString().slice(0,10);
+var log=[];
+var companyId=null;
+var human=null, ready=false, timer=null, lastSeen={}, busy=false, supa=null, kioskBlocked=false;
+var COLORS=['#2563eb','#10b981','#f59e0b','#7c3aed','#db2777','#0891b2','#ea580c','#4f46e5'];
+var capStream=null,capVid=null,samples=[],capPhoto=null,capFacing='user',capLiveTimer=null;
+
+function tick(){var n=new Date();
+  document.getElementById('clock').textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
+  document.getElementById('date').textContent=n.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});}
+setInterval(tick,1000);tick();
+
+/* ===== STOP SCAN + AUDIO WHEN TAB HIDDEN OR CLOSED (fixes phantom beeping) ===== */
+function pauseKiosk(){paused=true;if(timer){clearInterval(timer);timer=null;}try{if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}catch(e){}}
+function resumeKiosk(){paused=false;if(ready&&!timer)scan();try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();}catch(e){}}
+document.addEventListener('visibilitychange',function(){if(document.hidden)pauseKiosk();else resumeKiosk();});
+window.addEventListener('pagehide',function(){pauseKiosk();try{if(audioCtx){audioCtx.close();audioCtx=null;}}catch(e){}});
+window.addEventListener('blur',function(){try{if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}catch(e){}});
+window.addEventListener('focus',function(){if(!document.hidden)resumeKiosk();});
+
+/* ===== Face matching via Human embeddings (1024-dim descriptors) ===== */
+/* Each enrolled person stores s.sigs = array of embedding vectors (one per angle). */
+function bestMatch(embedding){
+  // best similarity PER PERSON, then pick top two distinct people
+  var perPerson=[];
+  for(var i=0;i<staff.length;i++){var s=staff[i];if(!s.sigs||!s.sigs.length)continue;
+    var top=0;
+    for(var j=0;j<s.sigs.length;j++){
+      var sim;try{sim=human.match.similarity(embedding,s.sigs[j]);}catch(e){sim=0;}
+      if(sim>top)top=sim;
+    }
+    perPerson.push({person:s,sim:top});
+  }
+  perPerson.sort(function(a,b){return b.sim-a.sim;});
+  var first=perPerson[0]||{person:null,sim:0};
+  var second=perPerson[1]||{person:null,sim:0};
+  return {person:first.person,sim:first.sim,runnerSim:second.sim};
+}
+
+function setSync(online){var b=document.getElementById('syncBadge'),t=document.getElementById('syncTxt');if(!b)return;b.className='sync'+(online?' online':'');t.textContent=online?'Cloud synced':'Offline';}
+
+async function initSupa(){
+  if(!window.supabase){setLoad('Connection issue','Could not load cloud library. Check internet & reload.');return;}
+  try{
+    supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+    var r=await supa.rpc('company_public',{p_slug:COMPANY_SLUG});
+    if(r.error){blockKiosk({title:'Setup issue',msg:'Database error: '+(r.error.message||'unknown')+'. Reload the page.'});return;}
+    var found=(r.data&&r.data.length)?r.data[0]:null;
+    if(found){companyId=found.id;cfg.company=found.name;if(found.late_after)cfg.late=found.late_after;
+      var st=kioskAccess(found);
+      if(!st.ok){blockKiosk(st);return;}
+    }
+    else{
+      blockKiosk({title:'Company not found',msg:'This kiosk link is invalid. Use the link from your TeamTrack signup.'});return;
+    }
+    setSync(true);
+    await loadCloud();
+    refresh();
+  }catch(e){setLoad('Connection issue',(e&&e.message?e.message:'Could not reach the cloud')+' — reload the page.');setSync(false);}
+}
+function kioskAccess(co){
+  if(co.active===false)return {ok:false,title:'Account paused',msg:'This account is paused. Contact TeamTrack support.'};
+  var plan=co.plan||'trial';
+  if(plan==='paid')return {ok:true};
+  if(co.trial_ends){if(Date.now()>new Date(co.trial_ends).getTime())return {ok:false,title:'Trial expired',msg:'The 30-day free trial has ended. Please renew TeamTrack to continue.'};return {ok:true};}
+  if(plan==='expired')return {ok:false,title:'Trial expired',msg:'The free trial has ended. Please renew TeamTrack to continue.'};
+  return {ok:true};
+}
+function blockKiosk(st){
+  kioskBlocked=true;
+  paused=true;if(timer){clearInterval(timer);timer=null;}
+  document.getElementById('launch').classList.add('hidden');
+  document.getElementById('loadState').classList.remove('hidden');
+  setLoad(st.title,st.msg+'  —  ₹6,000/year + GST to renew.');
+  setSync(false);
+}
+
+async function loadCloud(){
+  if(!supa||!companyId)return;
+  try{
+    var r=await supa.from('employees').select('*').eq('company_id',companyId);
+    if(r.data){staff=r.data.map(function(e){return{id:e.id,name:e.name,empId:e.emp_id,role:e.role,shift:e.shift,shiftEnd:e.shift_end||'18:00',sigs:e.sigs,photo:e.photo,color:e.color||COLORS[0]};});}
+    var a=await supa.from('attendance').select('*').eq('company_id',companyId).eq('date',dayKey);
+    if(a.data){log=a.data.map(function(x){var emp=staff.find(function(s){return s.id===x.emp_id;});return{empId:x.emp_id,name:emp?emp.name:'',role:emp?emp.role:'',photo:emp?emp.photo:null,color:emp?emp.color:COLORS[0],inTime:x.in_time,inTs:Date.now(),outTime:x.out_time,hours:x.hours,late:x.late};});}
+    if(staff.filter(function(s){return s.sigs;}).length){hideStates();}
+  }catch(e){}
+}
+
+async function loadEngine(){
+  setLoad('Loading recognition engine…','High-accuracy face engine — first load may take a moment');
+  try{
+    var config={
+      modelBasePath:'https://vladmandic.github.io/human-models/models/',
+      backend:'humangl',
+      async:true,
+      warmup:'none',
+      cacheSensitivity:0,
+      filter:{enabled:true,equalization:false},
+      face:{
+        enabled:true,
+        detector:{rotation:true,maxDetected:1,minConfidence:0.4,return:false},
+        mesh:{enabled:true},
+        iris:{enabled:false},
+        description:{enabled:true},
+        emotion:{enabled:false},
+        antispoof:{enabled:false},
+        liveness:{enabled:false}
+      },
+      body:{enabled:false},hand:{enabled:false},object:{enabled:false},gesture:{enabled:false}
+    };
+    human=new Human(config);
+    await human.load();
+    await human.warmup();
+    ready=true;startCamera();
+  }catch(e){
+    try{
+      human=new Human({modelBasePath:'https://vladmandic.github.io/human-models/models/',backend:'wasm',async:true,warmup:'none',face:{enabled:true,detector:{rotation:true,maxDetected:1},mesh:{enabled:true},description:{enabled:true},iris:{enabled:false},emotion:{enabled:false}},body:{enabled:false},hand:{enabled:false},object:{enabled:false},gesture:{enabled:false}});
+      await human.load();ready=true;startCamera();
+    }catch(e2){setLoad('Engine failed to load','Check internet & reload the page');}
+  }
+}
+function setLoad(t,s){document.getElementById('loadTitle').textContent=t;document.getElementById('loadSub').textContent=s;}
+
+async function startCamera(){
+  hideStates();document.getElementById('loadState').classList.remove('hidden');setLoad('Starting camera…','');
+  try{var stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}}});
+    var v=document.getElementById('video');v.srcObject=stream;await v.play();
+    if(kioskBlocked)return;
+    document.getElementById('loadState').classList.add('hidden');
+    document.getElementById('launchCo').textContent=cfg.company||'Attendance';
+    document.getElementById('launch').classList.remove('hidden');
+    scan();
+  }catch(e){document.getElementById('loadState').classList.add('hidden');showState('permState');}
+}
+var kioskMode='idle'; // idle | attendance | test
+window.startAttendance=function(){
+  if(!staff.filter(function(s){return s.sigs&&s.sigs.length;}).length){document.getElementById('launch').classList.add('hidden');showState('setupState');return;}
+  kioskMode='attendance';document.getElementById('launch').classList.add('hidden');
+  setPrompt('Look at the camera','Your attendance is marked automatically');
+};
+window.backToLaunch=function(){kioskMode='idle';busy=false;hideStates();document.getElementById('launch').classList.remove('hidden');};
+window.refreshScan=async function(){
+  // unstick scanning: clear flags, reset any flash/overlay, restart loop, reload cloud
+  busy=false;scanning=false;paused=false;confirmId=null;confirmCount=0;pendingOut=null;
+  try{hideFlash();}catch(e){}
+  var zone=document.getElementById('scanZone');if(zone)zone.className='scan-zone';
+  if(kioskMode==='idle')kioskMode='attendance';
+  setPrompt('Refreshing…','One moment');
+  // restart the scan timer
+  if(timer){clearInterval(timer);timer=null;}scan();
+  // re-pull latest staff/attendance from cloud
+  try{if(supa){await loadCloud();refresh();}}catch(e){}
+  setPrompt('Look at the camera','Your attendance is marked automatically');
+  toast('Refreshed','ok');
+};
+function scan(){if(timer)clearInterval(timer);timer=setInterval(loop,SCAN_MS);}
+var scanning=false, confirmId=null, confirmCount=0;
+async function loop(){
+  if(paused||!ready||busy||scanning)return;
+  if(kioskMode==='idle')return; // launch screen showing, don't scan
+  var v=document.getElementById('video');if(!v.videoWidth)return;
+  var enrolled=staff.filter(function(s){return s.sigs&&s.sigs.length;});if(!enrolled.length)return;
+  scanning=true;
+  var res;try{res=await human.detect(v);}catch(e){scanning=false;return;}
+  scanning=false;
+  if(paused||busy||kioskMode==='idle')return;
+
+  if(kioskMode==='test'){return testLoop(res);}
+
+  var zone=document.getElementById('scanZone');
+  if(!res||!res.face||!res.face.length){zone.className='scan-zone';confirmId=null;confirmCount=0;setPrompt('Look at the camera','Your attendance is marked automatically');return;}
+  // reject if more than one face in frame (avoids wrong person)
+  if(res.face.length>1){zone.className='scan-zone detecting';confirmId=null;confirmCount=0;setPrompt('One person at a time','Please step in one by one');return;}
+  var face=res.face[0];
+  if(!face.embedding||!face.embedding.length){zone.className='scan-zone detecting';setPrompt('Hold still…','Reading your face');return;}
+  // require a reasonably front-facing, confident detection
+  if(face.score!==undefined && face.score<0.6){zone.className='scan-zone detecting';setPrompt('Look at the camera','Face the screen directly');return;}
+  zone.className='scan-zone detecting';
+  var m=bestMatch(face.embedding);
+  // 1) absolute threshold  2) clear margin over the runner-up (no confusion)
+  if(!m.person||m.sim<MATCH_MIN||(m.sim-m.runnerSim)<MATCH_MARGIN){
+    confirmId=null;confirmCount=0;
+    zone.className='scan-zone fail';setPrompt('Keep looking at the camera…','Recognizing — move a little closer or improve light');return;
+  }
+  // 3) multi-frame confirmation: same person must win CONFIRM_FRAMES times in a row
+  if(confirmId===m.person.id){confirmCount++;}else{confirmId=m.person.id;confirmCount=1;}
+  if(confirmCount<CONFIRM_FRAMES){setPrompt('Verifying…','Hold still for a moment');return;}
+  confirmId=null;confirmCount=0;
+  var now=Date.now();if(lastSeen[m.person.id]&&now-lastSeen[m.person.id]<COOLDOWN)return;
+  lastSeen[m.person.id]=now;mark(m.person);
+}
+
+/* ===== TEST MODE ===== */
+var testTotal=0,testRight=0,testWrong=0,testWaiting=false,testCooldownUntil=0;
+window.startTestMode=function(){
+  if(!staff.filter(function(s){return s.sigs&&s.sigs.length;}).length){toast('Enroll at least one person first (Admin → Enroll)','err');return;}
+  kioskMode='test';testTotal=0;testRight=0;testWrong=0;testWaiting=false;testCooldownUntil=0;
+  document.body.classList.add('testing');
+  updateTestStats();
+  document.getElementById('launch').classList.add('hidden');
+  document.getElementById('tmAsk').classList.remove('show');
+  document.getElementById('tmPrompt').style.display='flex';
+  document.getElementById('tmPrompt').textContent='Look at the camera — testing recognition…';
+  document.getElementById('tmFoot').textContent='Each match will ask if it was correct. Build up 10+ scans for a meaningful figure.';
+  document.getElementById('testmode').classList.add('show');
+};
+window.exitTestMode=function(){kioskMode='idle';testWaiting=false;document.body.classList.remove('testing');document.getElementById('testmode').classList.remove('show');document.getElementById('launch').classList.remove('hidden');};
+function testLoop(res){
+  if(testWaiting)return;
+  if(Date.now()<testCooldownUntil)return;
+  if(!res||!res.face||!res.face.length){document.getElementById('tmPrompt').textContent='Look at the camera — testing recognition…';return;}
+  if(res.face.length>1){document.getElementById('tmPrompt').textContent='One person at a time';return;}
+  var face=res.face[0];
+  if(!face.embedding||!face.embedding.length){document.getElementById('tmPrompt').textContent='Hold still… reading your face';return;}
+  if(face.score!==undefined&&face.score<0.6){document.getElementById('tmPrompt').textContent='Face the screen directly';return;}
+  var m=bestMatch(face.embedding);
+  if(!m.person||m.sim<MATCH_MIN||(m.sim-m.runnerSim)<MATCH_MARGIN){
+    document.getElementById('tmPrompt').textContent='Not recognized — move closer or improve lighting';return;
+  }
+  // got a confident match -> ask user
+  testWaiting=true;testPending=m;
+  var p=m.person;
+  var ph=document.getElementById('tmAskPhoto');var ini=p.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  if(p.photo)ph.innerHTML='<img src="'+p.photo+'">';else{ph.innerHTML='';ph.textContent=ini;}
+  document.getElementById('tmAskName').textContent=p.name;
+  document.getElementById('tmAskSim').textContent='Confidence '+Math.round(m.sim*100)+'%  ·  margin '+Math.round((m.sim-m.runnerSim)*100)+'%';
+  document.getElementById('tmPrompt').style.display='none';
+  document.getElementById('tmAsk').classList.add('show');
+}
+var testPending=null;
+window.testAnswer=function(correct){
+  testTotal++;if(correct)testRight++;else testWrong++;
+  updateTestStats();closeTestAsk();
+};
+window.testSkip=function(){closeTestAsk();}; // not counted
+function closeTestAsk(){
+  testPending=null;testWaiting=false;testCooldownUntil=Date.now()+2500;
+  document.getElementById('tmAsk').classList.remove('show');
+  document.getElementById('tmPrompt').style.display='flex';
+  document.getElementById('tmPrompt').textContent='Next person — look at the camera…';
+}
+function updateTestStats(){
+  document.getElementById('tmTotal').textContent=testTotal;
+  document.getElementById('tmRight').textContent=testRight;
+  document.getElementById('tmWrong').textContent=testWrong;
+  var acc=testTotal?Math.round((testRight/testTotal)*100):null;
+  document.getElementById('tmAcc').textContent=acc===null?'—':acc+'%';
+  if(testTotal>=1){
+    var verdict='';
+    if(testTotal<10)verdict='Keep going — '+(10-testTotal)+' more scan'+(10-testTotal===1?'':'s')+' for a reliable figure.';
+    else if(acc>=97)verdict='Excellent — this model is ready to ship. ✅';
+    else if(acc>=90)verdict='Good. Re-enrol the few that failed, then it\u2019s ship-ready.';
+    else if(acc>=75)verdict='Fair. Improve lighting & re-enrol faces with 3 clear angles.';
+    else verdict='Low accuracy — re-enrol everyone in good light, faces centred.';
+    document.getElementById('tmFoot').textContent=verdict;
+  }
+}
+function setPrompt(t,s){document.getElementById('promptText').textContent=t;document.getElementById('promptSub').textContent=s;}
+
+function minutesNow(now){return now.getHours()*60+now.getMinutes();}
+function mark(p){
+  busy=true;document.getElementById('scanZone').className='scan-zone success';
+  var now=new Date();var time=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+  var rec=log.find(function(l){return l.empId===p.id;});
+
+  // CASE 1: not checked in yet -> instant GREEN check-in
+  if(!rec){
+    var late=false;if(p.shift){var pp=p.shift.split(':');var la=(+pp[0])*60+(+pp[1])+(cfg.late||15);if(minutesNow(now)>la)late=true;}
+    rec={empId:p.id,name:p.name,role:p.role,photo:p.photo,color:p.color,inTime:time,inTs:now.getTime(),late:late,outTime:null};log.push(rec);
+    saveLog();if(supa)pushCloud(rec,'in');beep('in');refresh();
+    showFlash('green',p,'Checked In',time,late?'Marked late':'Have a productive day','',null);
+    return;
+  }
+  // CASE 3: already checked out -> info
+  if(rec.outTime){
+    beep('done');
+    showFlash('blue',p,'Already Done',rec.outTime,'You already checked out today','',null);
+    return;
+  }
+  // CASE 2: checked in, not out yet -> decide confirm vs auto
+  var withinClosing=false;
+  if(p.shiftEnd){var ep=p.shiftEnd.split(':');var endMin=(+ep[0])*60+(+ep[1]);if(minutesNow(now)>=endMin-CLOSE_WINDOW_MIN)withinClosing=true;}
+  if(withinClosing){
+    // auto checkout, no confirm
+    doCheckout(p,rec,now,time,true);
+  }else{
+    // ask RED confirm
+    beep('confirm');
+    pendingOut={p:p,rec:rec};
+    showFlash('red',p,'Checking OUT?',time,'You are checking <b>OUT</b>, not in.<br>Confirm to end your day.','',[
+      {label:'Confirm Out',cls:'confirm',fn:'confirmOut'},
+      {label:'Cancel',cls:'cancel',fn:'cancelOut'}
+    ]);
+  }
+}
+function doCheckout(p,rec,now,time,early){
+  rec.outTime=time;rec.outTs=now.getTime();rec.hours=((rec.outTs-rec.inTs)/3600000).toFixed(1);
+  saveLog();if(supa)pushCloud(rec,'out');beep('out');refresh();
+  var note='';if(rec.hours)note=rec.hours+' hrs worked today';
+  if(early)note='Leaving early · '+(rec.hours||'')+' hrs today';
+  showFlash('blue',p,'Checked Out',time,note,'',null);
+}
+window.confirmOut=function(){
+  if(!pendingOut)return;var po=pendingOut;pendingOut=null;
+  doCheckout(po.p,po.rec,new Date(),new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}),false);
+};
+window.cancelOut=function(){pendingOut=null;hideFlash();};
+
+function showFlash(color,p,title,time,note,extra,actions){
+  var f=document.getElementById('flash');
+  var ph=document.getElementById('flashPhoto');var ini=p.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  if(p.photo)ph.innerHTML='<img src="'+p.photo+'">';else{ph.innerHTML='';ph.textContent=ini;}
+  // icon
+  var icons={green:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    blue:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    red:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'};
+  document.getElementById('flashIcon').innerHTML=actions?icons.red:icons[color];
+  document.getElementById('flashTitle').textContent=title;
+  document.getElementById('flashName').textContent=p.name;
+  document.getElementById('flashTime').textContent=time.replace(/\s?[AP]M/i,'');
+  document.getElementById('flashNote').innerHTML=note||'';
+  var act=document.getElementById('flashActions');
+  if(actions){act.innerHTML=actions.map(function(a){return '<button class="flash-btn '+a.cls+'" onclick="'+a.fn+'()">'+a.label+'</button>';}).join('');}
+  else act.innerHTML='';
+  f.className='flash show '+color;
+  // auto-dismiss only when NOT a confirm prompt
+  if(!actions){clearTimeout(f._t);f._t=setTimeout(hideFlash,HOLD);}
+}
+function hideFlash(){
+  var f=document.getElementById('flash');f.className='flash';
+  busy=false;pendingOut=null;
+  document.getElementById('scanZone').className='scan-zone';
+  setPrompt('Look at the camera','Your attendance is marked automatically');
+}
+function beep(mode){var c=getAudio();if(!c)return;try{
+  var seq=mode==='in'?[{f:660,t:0},{f:990,t:.12}]:mode==='out'?[{f:880,t:0},{f:587,t:.12}]:mode==='confirm'?[{f:520,t:0}]:[{f:440,t:0}];
+  seq.forEach(function(n){var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=n.f;var s=c.currentTime+n.t;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.45,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.28);o.start(s);o.stop(s+.3);});
+}catch(e){}}
+function refresh(){document.getElementById('cIn').textContent=log.length;document.getElementById('cOut').textContent=log.filter(function(l){return l.outTime;}).length;if(cfg.company)document.getElementById('coName').textContent=cfg.company;}
+
+var pinBuf='';
+window.askPin=function(){pinBuf='';renderPin();document.getElementById('pinwrap').classList.add('open');};
+window.closePin=function(){document.getElementById('pinwrap').classList.remove('open');pinBuf='';};
+window.pinPress=function(d){if(pinBuf.length>=4)return;pinBuf+=d;renderPin();if(pinBuf.length===4)setTimeout(checkPin,150);};
+window.pinDel=function(){pinBuf=pinBuf.slice(0,-1);renderPin();};
+window.pinClear=function(){pinBuf='';renderPin();};
+function renderPin(err){var dots=document.querySelectorAll('#pinDots .pin-dot');dots.forEach(function(d,i){d.className='pin-dot'+(i<pinBuf.length?' filled':'')+(err?' err':'');});}
+async function checkPin(){
+  if(!pinBuf||pinBuf.length<4)return;
+  try{
+    var r=await supa.rpc('company_login',{p_slug:COMPANY_SLUG,p_pin:pinBuf});
+    if(r.data&&r.data.length){closePin();openModal();}
+    else{renderPin(true);setTimeout(function(){pinBuf='';renderPin();},500);}
+  }catch(e){renderPin(true);setTimeout(function(){pinBuf='';renderPin();},500);}
+}
+
+function openModal(){adminPrevMode=kioskMode;kioskMode='idle';document.getElementById('overlay').classList.add('open');renderRoster();
+  document.getElementById('sCo').value=cfg.company||'';document.getElementById('sPin').value=cfg.pin||'';document.getElementById('sUrl').value=cfg.url||'';document.getElementById('sKey').value=cfg.key||'';document.getElementById('sLate').value=cfg.late||15;}
+var adminPrevMode='idle';
+window.closeModal=function(){document.getElementById('overlay').classList.remove('open');capStop();kioskMode='idle';hideStates();document.getElementById('testmode').classList.remove('show');document.getElementById('launchCo').textContent=cfg.company||'Attendance';document.getElementById('launch').classList.remove('hidden');};
+window.mtab=function(t,b){document.querySelectorAll('.mtab').forEach(function(x){x.classList.remove('active');});b.classList.add('active');
+  document.getElementById('tEnroll').style.display=t==='enroll'?'block':'none';document.getElementById('tRoster').style.display=t==='roster'?'block':'none';document.getElementById('tSettings').style.display=t==='settings'?'block':'none';if(t==='roster')renderRoster();};
+
+window.capStart=async function(){
+  var c=document.getElementById('cap');c.innerHTML='';
+  capVid=document.createElement('video');capVid.autoplay=true;capVid.muted=true;capVid.playsInline=true;capVid.setAttribute('playsinline','');c.appendChild(capVid);
+  var live=document.createElement('div');live.className='cap-live';live.id='capLive';live.innerHTML='<span class="ld"></span><span id="capLiveTxt">Searching…</span>';c.appendChild(live);
+  var pr=document.createElement('div');pr.className='cap-prog';pr.innerHTML='<span>Captured</span><div class="cdots"><div class="cd" id="cd0"></div><div class="cd" id="cd1"></div><div class="cd" id="cd2"></div><div class="cd" id="cd3"></div><div class="cd" id="cd4"></div></div>';c.appendChild(pr);
+  var flip=document.createElement('button');flip.type='button';flip.className='cap-flip';flip.innerHTML='⟲ Flip';flip.onclick=function(ev){ev.stopPropagation();capFacing=(capFacing==='user'?'environment':'user');capStart();};c.appendChild(flip);
+  try{capStop();
+    capStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:capFacing},width:{ideal:1280},height:{ideal:720}}});
+    capVid.srcObject=capStream;await capVid.play();document.getElementById('capBtn').disabled=false;startCapLive();
+  }catch(e){try{capStream=await navigator.mediaDevices.getUserMedia({video:true});capVid.srcObject=capStream;await capVid.play();document.getElementById('capBtn').disabled=false;startCapLive();}
+    catch(e2){c.innerHTML='<div class="cap-hint">Camera access denied — check permissions in the address bar</div>';}}
+};
+function startCapLive(){if(capLiveTimer)clearInterval(capLiveTimer);
+  var liveBusy=false;
+  capLiveTimer=setInterval(async function(){if(!ready||!capVid||!capVid.videoWidth||liveBusy)return;
+    liveBusy=true;var res;try{res=await human.detect(capVid);}catch(e){liveBusy=false;return;}liveBusy=false;
+    var live=document.getElementById('capLive');if(!live)return;
+    if(res&&res.face&&res.face.length){live.className='cap-live found';document.getElementById('capLiveTxt').textContent='Face detected ✓';}
+    else{live.className='cap-live';document.getElementById('capLiveTxt').textContent='No face — center your face';}},400);}
+window.capStop=function(){if(capLiveTimer){clearInterval(capLiveTimer);capLiveTimer=null;}if(capStream){capStream.getTracks().forEach(function(t){t.stop();});capStream=null;}};
+window.capAngle=async function(){
+  if(!capVid||!capVid.videoWidth){toast('Start camera first','err');return;}
+  if(!ready){toast('Engine still loading — wait a moment','err');return;}
+  var btn=document.getElementById('capBtn');btn.disabled=true;var prevTxt=btn.textContent;btn.textContent='Reading…';
+  var res;try{res=await human.detect(capVid);}catch(e){btn.disabled=false;btn.textContent=prevTxt;toast('Detection error — retry','err');return;}
+  if(!res||!res.face||!res.face.length){btn.disabled=false;btn.textContent=prevTxt;toast('No face — center your face in the frame','err');return;}
+  if(res.face.length>1){btn.disabled=false;btn.textContent=prevTxt;toast('Multiple faces — only the person being enrolled should be visible','err');return;}
+  var face=res.face[0];
+  if(!face.embedding||!face.embedding.length){btn.disabled=false;btn.textContent=prevTxt;toast('No clear face — wait for the green "Face detected" badge','err');return;}
+  if(face.score!==undefined&&face.score<0.6){btn.disabled=false;btn.textContent=prevTxt;toast('Face not clear — face the camera in good light','err');return;}
+  var emb=face.embedding.slice();
+  // guard: this capture must not strongly match a DIFFERENT already-enrolled person
+  var conflict=null,conflictSim=0;
+  for(var i=0;i<staff.length;i++){var s=staff[i];if(!s.sigs||!s.sigs.length)continue;
+    for(var j=0;j<s.sigs.length;j++){var sm;try{sm=human.match.similarity(emb,s.sigs[j]);}catch(e){sm=0;}if(sm>conflictSim){conflictSim=sm;conflict=s;}}}
+  if(conflict&&conflictSim>=0.7){btn.disabled=false;btn.textContent=prevTxt;toast('This face already matches "'+conflict.name+'". Cannot enroll the same person twice.','err');return;}
+  // guard: all captured angles of THIS person should be the same face
+  if(samples.length){var selfMin=1;for(var k=0;k<samples.length;k++){var ss;try{ss=human.match.similarity(emb,samples[k]);}catch(e){ss=0;}if(ss<selfMin)selfMin=ss;}
+    if(selfMin<0.42){btn.disabled=false;btn.textContent=prevTxt;toast('This looks like a different person than the previous angle — retry','err');return;}}
+  samples.push(emb);
+  if(samples.length===1)capPhoto=snapPhoto();
+  var d=document.getElementById('cd'+(samples.length-1));if(d)d.classList.add('on');
+  btn.textContent='Capture ('+samples.length+'/5)';btn.disabled=false;
+  var hints=['turn head slightly LEFT','now turn slightly RIGHT','now tilt head UP a little','now tilt head DOWN a little'];
+  if(samples.length>=5){btn.disabled=true;document.getElementById('enrollBtn').disabled=false;toast('All 5 angles captured ✓','ok');}
+  else toast('Angle '+samples.length+' captured — '+hints[samples.length-1],'ok');
+};
+function snapPhoto(){var cv=document.createElement('canvas');cv.width=160;cv.height=160;var vw=capVid.videoWidth,vh=capVid.videoHeight,sz=Math.min(vw,vh);cv.getContext('2d').drawImage(capVid,(vw-sz)/2,(vh-sz)/2,sz,sz,0,0,160,160);return cv.toDataURL('image/jpeg',.8);}
+window.enroll=async function(){
+  var name=document.getElementById('eName').value.trim();if(!name){toast('Enter name','err');return;}
+  if(samples.length<5){toast('Capture all 5 angles','err');return;}
+  if(!supa||!companyId){toast('Not connected to cloud — cannot enroll. Check internet & reload.','err');return;}
+  var p={id:'emp_'+Date.now(),name:name,empId:document.getElementById('eId').value.trim(),role:document.getElementById('eRole').value.trim()||'Staff',shift:document.getElementById('eShift').value||'09:00',sigs:samples.slice(),photo:capPhoto,color:COLORS[staff.length%COLORS.length]};
+  await pushEmp(p);staff.push(p);samples=[];capPhoto=null;
+  document.getElementById('eName').value='';document.getElementById('eId').value='';document.getElementById('eRole').value='';
+  document.getElementById('cap').innerHTML='<svg class="cap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="cap-hint">Tap to start camera</div>';
+  document.getElementById('capBtn').textContent='Capture (0/5)';document.getElementById('capBtn').disabled=true;document.getElementById('enrollBtn').disabled=true;
+  capStop();hideStates();toast(name+' enrolled','ok');renderRoster();
+};
+function renderRoster(){var l=document.getElementById('rosterList');if(!staff.length){l.innerHTML='<div class="empty">No staff enrolled. Use the Enroll tab.</div>';return;}
+  l.innerHTML='';staff.forEach(function(s){var ini=s.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();var ph=s.photo?'<img src="'+s.photo+'">':ini;var ps=s.photo?'':'style="color:'+s.color+';background:'+s.color+'18"';
+    var d=document.createElement('div');d.className='ritem';d.innerHTML='<div class="rphoto" '+ps+'>'+ph+'</div><div class="rinfo"><div class="rname">'+s.name+'</div><div class="rmeta">'+(s.empId?s.empId+' · ':'')+s.role+' · '+s.shift+'</div></div><button class="rdel" data-id="'+s.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';l.appendChild(d);});
+  l.querySelectorAll('.rdel').forEach(function(b){b.onclick=function(){rmStaff(b.getAttribute('data-id'));};});}
+async function rmStaff(id){staff=staff.filter(function(s){return s.id!==id;});saveStaff();renderRoster();refresh();if(supa){try{await supa.from('employees').delete().eq('id',id);}catch(e){}}toast('Removed','err');}
+window.saveSettings=function(){cfg.company=document.getElementById('sCo').value.trim();cfg.pin=document.getElementById('sPin').value.trim()||DEFAULT_PIN;cfg.url=document.getElementById('sUrl').value.trim();cfg.key=document.getElementById('sKey').value.trim();cfg.late=parseInt(document.getElementById('sLate').value)||15;localStorage.setItem('k_cfg',JSON.stringify(cfg));refresh();toast('Saved','ok');initSupa();};
+window.exportCsv=function(){var rows=[['Name','Role','Check In','Check Out','Hours','Status']];log.forEach(function(l){rows.push([l.name,l.role||'',l.inTime||'',l.outTime||'',l.hours||'',l.late?'Late':'On Time']);});staff.forEach(function(s){if(!log.find(function(l){return l.empId===s.id;}))rows.push([s.name,s.role||'','','','','Absent']);});var blob=new Blob([rows.map(function(r){return r.join(',');}).join('\n')],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='attendance_'+dayKey+'.csv';a.click();toast('CSV downloaded','ok');};
+async function pushEmp(p){try{await supa.from('employees').insert({id:p.id,company_id:companyId,name:p.name,emp_id:p.empId,role:p.role,shift:p.shift,sigs:p.sigs,photo:p.photo,color:p.color});}catch(e){toast('Cloud save failed — check connection','err');}}
+async function pushCloud(rec,mode){try{if(mode==='in')await supa.from('attendance').insert({company_id:companyId,emp_id:rec.empId,date:dayKey,in_time:rec.inTime,late:rec.late});else if(mode==='out')await supa.from('attendance').update({out_time:rec.outTime,hours:rec.hours}).eq('emp_id',rec.empId).eq('date',dayKey);}catch(e){}}
+function saveStaff(){}
+function saveLog(){}
+function showState(id){hideStates();document.getElementById(id).classList.remove('hidden');}
+function hideStates(){document.querySelectorAll('.state').forEach(function(s){if(s.id!=='loadState')s.classList.add('hidden');});}
+function toast(m,t){var e=document.getElementById('toast');e.textContent=m;e.className='toast show '+(t||'');clearTimeout(e._t);e._t=setTimeout(function(){e.className='toast';},2800);}
+window.startCamera=startCamera;
+
+/* BOOT — connect cloud first, then start engine */
+window.addEventListener('error',function(ev){
+  try{var ls=document.getElementById('loadState');if(ls){ls.classList.remove('hidden');setLoad('Something went wrong',(ev.message||'Script error')+' — please reload.');}}catch(e){}
+});
+(async function(){
+  try{
+    setSync(false);
+    await initSupa();
+    if(!kioskBlocked)loadEngine();
+  }catch(e){
+    try{setLoad('Startup error',(e&&e.message?e.message:'Unknown')+' — reload the page.');}catch(_){}
+  }
+})();
+</script>
+</body>
+</html>
