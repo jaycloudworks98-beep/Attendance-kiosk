@@ -89,6 +89,11 @@
   .gear{position:absolute;top:84px;right:24px;z-index:15;display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:13px;background:var(--blue);border:none;cursor:pointer;color:#fff;transition:.2s;font-weight:700;font-size:14px;font-family:inherit;box-shadow:0 6px 20px rgba(37,99,235,.5);}
   .gear:hover{background:var(--blue-dark);transform:translateY(-1px)}
   .gear svg{width:18px;height:18px}
+  .kiosk-refresh{position:absolute;top:84px;right:148px;z-index:15;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.14);border:none;cursor:pointer;color:#fff;transition:.2s;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+  .kiosk-refresh:hover{background:rgba(255,255,255,.24)}
+  .kiosk-refresh:active{transform:scale(.92) rotate(-180deg)}
+  .kiosk-refresh svg{width:21px;height:21px}
+  body.testing .kiosk-refresh{display:none!important}
   .sync{position:absolute;bottom:24px;left:22px;z-index:9;display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;background:rgba(255,255,255,.12);font-size:13px;font-weight:700;color:rgba(255,255,255,.75)}
   .sync .sd{width:9px;height:9px;border-radius:50%;background:var(--amber)}
   .sync.online .sd{background:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.25)}.sync.online{color:#fff;background:rgba(16,185,129,.2)}
@@ -215,7 +220,7 @@
   <div class="topbar">
     <div class="company">
       <div class="company-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
-      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v8</div></div>
+      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v9</div></div>
     </div>
     <div class="topbar-clock"><div class="tb-time" id="clock">00:00</div><div class="tb-date" id="date">—</div></div>
   </div>
@@ -243,6 +248,7 @@
     <div class="bcount"><div class="bcount-num blue" id="cOut">0</div><div class="bcount-label">Checked out</div></div>
   </div>
   <div class="sync" id="syncBadge"><span class="sd"></span><span id="syncTxt">Local</span></div>
+  <div class="kiosk-refresh" onclick="refreshScan()" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
   <div class="gear" onclick="askPin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span>Admin</span></div>
 </div>
 <div class="state" id="loadState"><div class="ring"></div><div class="state-title" id="loadTitle">Starting…</div><div class="state-sub" id="loadSub">Loading recognition engine</div></div>
@@ -475,6 +481,20 @@ window.startAttendance=function(){
   setPrompt('Look at the camera','Your attendance is marked automatically');
 };
 window.backToLaunch=function(){kioskMode='idle';busy=false;hideStates();document.getElementById('launch').classList.remove('hidden');};
+window.refreshScan=async function(){
+  // unstick scanning: clear flags, reset any flash/overlay, restart loop, reload cloud
+  busy=false;scanning=false;paused=false;confirmId=null;confirmCount=0;pendingOut=null;
+  try{hideFlash();}catch(e){}
+  var zone=document.getElementById('scanZone');if(zone)zone.className='scan-zone';
+  if(kioskMode==='idle')kioskMode='attendance';
+  setPrompt('Refreshing…','One moment');
+  // restart the scan timer
+  if(timer){clearInterval(timer);timer=null;}scan();
+  // re-pull latest staff/attendance from cloud
+  try{if(supa){await loadCloud();refresh();}}catch(e){}
+  setPrompt('Look at the camera','Your attendance is marked automatically');
+  toast('Refreshed','ok');
+};
 function scan(){if(timer)clearInterval(timer);timer=setInterval(loop,SCAN_MS);}
 var scanning=false, confirmId=null, confirmCount=0;
 async function loop(){
@@ -760,3 +780,4 @@ window.startCamera=startCamera;
 </script>
 </body>
 </html>
+
