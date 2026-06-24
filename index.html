@@ -220,7 +220,7 @@
   <div class="topbar">
     <div class="company">
       <div class="company-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z"/><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
-      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v12</div></div>
+      <div><div class="company-name" id="coName">Attendance</div><div class="company-tag">Face check-in · v13</div></div>
     </div>
     <div class="topbar-clock"><div class="tb-time" id="clock">00:00</div><div class="tb-date" id="date">—</div></div>
   </div>
@@ -505,7 +505,9 @@ async function loop(){
   if(paused||!ready||busy||scanning)return;
   if(kioskMode==='idle')return; // launch screen showing, don't scan
   var v=document.getElementById('video');if(!v.videoWidth)return;
-  var enrolled=staff.filter(function(s){return s.sigs&&s.sigs.length;});if(!enrolled.length)return;
+  if(!staff||!staff.length){setPrompt('Loading staff…','Connecting to your team list');return;}
+  var enrolled=staff.filter(function(s){return s.sigs&&(s.sigs.length||(typeof s.sigs==='object'));});
+  if(!enrolled.length){setPrompt('No faces enrolled yet','Open Admin to enroll faces, then return here');return;}
   scanning=true;
   var res;try{res=await human.detect(v);}catch(e){scanning=false;return;}
   scanning=false;
@@ -789,8 +791,13 @@ window.addEventListener('error',function(ev){
 (async function(){
   try{
     setSync(false);
-    await initSupa();
-    if(!kioskBlocked)loadEngine();
+    // start the face engine loading immediately (in parallel) — it's the slow part
+    var enginePromise=null;
+    // we check the company first (fast-ish), but kick the engine off right away
+    var supaPromise=initSupa();
+    // give initSupa a moment to set kioskBlocked if company is invalid/expired
+    await supaPromise;
+    if(!kioskBlocked){loadEngine();}
   }catch(e){
     try{setLoad('Startup error',(e&&e.message?e.message:'Unknown')+' — reload the page.');}catch(_){}
   }
